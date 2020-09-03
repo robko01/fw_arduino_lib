@@ -241,7 +241,7 @@ void prepare_all_variables()
 void setup_port()
 {
 	// Set serial communication.
-	COM_PORT.begin(COM_BAUDREATE);
+	COM_PORT.begin(COM_BAUDRATE);
 	COM_PORT.setTimeout(COM_PORT_TIMEOUT);
 }
 
@@ -436,13 +436,13 @@ void parse_frame(uint8_t * frame, uint8_t length)
 			// Respond with success.
 			send_raw_response(OpCodes::MoveRelative, StatusCodes::Ok, NULL, 0);
 		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveAblolute)
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveAbsolute)
 		{
 			// If it is not enabled, do not execute.
 			if (MotorsEnabled_g == false)
 			{
 				// Respond with error.
-				send_raw_response(OpCodes::MoveAblolute, StatusCodes::Error, NULL, 0);
+				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Error, NULL, 0);
 
 				// Exit
 				return;
@@ -454,7 +454,7 @@ void parse_frame(uint8_t * frame, uint8_t length)
 				PayloadResponse_g[0] = MotorState_g;
 
 				// Respond with busy.
-				send_raw_response(OpCodes::MoveAblolute, StatusCodes::Busy, PayloadResponse_g, 1);
+				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Busy, PayloadResponse_g, 1);
 				
 				// Exit
 				return;
@@ -474,7 +474,7 @@ void parse_frame(uint8_t * frame, uint8_t length)
 			move_absolute(Motion.Value);
 
 			// Respond with success.
-			send_raw_response(OpCodes::MoveAblolute, StatusCodes::Ok, NULL, 0);
+			send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Ok, NULL, 0);
 		}
 		else if (frame[FrameIndexes::OperationCode] == OpCodes::DO)
 		{

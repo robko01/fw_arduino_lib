@@ -39,7 +39,7 @@ enum OpCodes : uint8_t
 	Enable, ///< Enable engines.
 	Clear, ///< Clear robot position.
 	MoveRelative, ///< Move to relative position.
-	MoveAblolute, ///< Move to absolute position.
+	MoveAbsolute, ///< Move to absolute position.
 	DO, ///< Set digital port A value.
 	DI, ///< Read digital port A value. 
 	IsMoving, ///< Is robot is moveing?

@@ -38,7 +38,7 @@
 #define COM_PORT Serial
 
 /** @brief Communication port speed. */
-#define COM_BAUDREATE 115200
+#define COM_BAUDRATE 115200
 
 /** @brief Communication port update rate. */
 #define COM_UPDATE 100
