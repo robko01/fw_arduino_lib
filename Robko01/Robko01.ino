@@ -113,7 +113,7 @@ uint8_t PayloadResponse_g[FRAME_MAX_DATA_LEN];
 /** @brief Current address index. */
 uint8_t CurrentAddressIndex_g;
 
-/** @brief Safty stop flag. */
+/** @brief Safety stop flag. */
 int SaftyStopFlag_g;
 
 /** @brief Will store last time that the bus was updated. */
@@ -145,7 +145,7 @@ void setup()
 
 	prepare_all_variables();
 
-	// This is Safty stop input.
+	// This is Safety stop input.
 	pinMode(PIN_SS, INPUT_PULLUP);
 	
 	// Set the motors.
@@ -165,7 +165,7 @@ void loop()
 {
 	CurrentMillis_g = millis();
 
-#ifndef NO_SAFTY_SWITCH
+#ifndef NO_SAFETY_SWITCH
 	// Read safty switch.
 	SaftyStopFlag_g = digitalRead(PIN_SS);
 #endif

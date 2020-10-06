@@ -23,7 +23,7 @@
 #define _APPLICATIONCONFIGURATION_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
+	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
@@ -31,11 +31,11 @@
 #define EANBLE_DEBUG_OUT
 
 
-/** @brief Safty switch pin definition. */
+/** @brief Safety switch pin definition. */
 #define PIN_SS 9
 
-/** @brief No Safty Switch - coment to enable. */
-#define NO_SAFTY_SWITCH
+/** @brief No Safety Switch - coment to enable. */
+#define NO_SAFETY_SWITCH
 
 /** @brief Additional time schedule divider. */
 #define TIME_SCALER 2
