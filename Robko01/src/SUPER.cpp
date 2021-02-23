@@ -1,0 +1,600 @@
+/*
+	Copyright (c) [2019] [Orlin Dimitrov]
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+*/
+
+#include "SUPER.h"
+
+/** @brief Send RAW request frame.
+ *  @param opcode uint8_t, Operation code.
+ *  @param frame uint8_t*, Command for this operation code.
+ *  @param length const uint8_t, Length of the payload.
+ *  @return Void.
+ */
+void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8_t length) {
+
+	const int FrameLengthL = length + FRAME_STATIC_FIELD_LENGTH + 1;
+
+	uint8_t FrameL[(const int)FrameLengthL];
+
+	FrameL[FrameIndexes::Sentinel] = FRAME_SENTINEL;
+	FrameL[FrameIndexes::FrmType] = FrameType::Request;
+	FrameL[FrameIndexes::Length] = length + 1;
+	FrameL[FrameIndexes::OperationCode] = opcode;
+	for (uint8_t index = 0; index < length; index++)
+	{
+		FrameL[index + FRAME_STATIC_FIELD_OFFSET] = payload[index];
+	}
+
+	uint8_t CRCL[FRAME_CRC_LEN] = { 0, 0 };
+	calculate_CRC(FrameL, (uint8_t)(FrameLengthL - FRAME_CRC_LEN), CRCL);
+
+	for (uint8_t index = 0; index < FRAME_CRC_LEN; index++)
+	{
+		uint8_t FrmaeIndexL = index + FRAME_STATIC_FIELD_OFFSET + length;
+		FrameL[FrmaeIndexL] = CRCL[index];
+	}
+
+	// m_port->write(FrameL, FrameLengthL);
+	Serial.write(FrameL, FrameLengthL);
+}
+
+/** @brief Send RAW response frame.
+ *  @param opcode uint8_t, Operation code.
+ *  @param frame uint8_t*, Command for this operation code.
+ *  @param length const uint8_t, Length of the payload.
+ *  @return Void.
+ */
+void SUPERClass::send_raw_response(uint8_t opcode, uint8_t status, uint8_t * payload, const uint8_t length) {
+
+	const int FrameLengthL = length + FRAME_STATIC_FIELD_LENGTH + FRAME_RESPONSE_PAYLOAD_OFFSET;
+
+	uint8_t FrameL[(const int)FrameLengthL];
+
+	FrameL[FrameIndexes::Sentinel] = FRAME_SENTINEL;
+	FrameL[FrameIndexes::FrmType] = FrameType::Response;
+	FrameL[FrameIndexes::Length] = length + FRAME_RESPONSE_PAYLOAD_OFFSET;
+	FrameL[FrameIndexes::OperationCode] = opcode;
+	FrameL[FrameIndexes::StatusCode] = status;
+	for (uint8_t index = 0; index < length; index++)
+	{
+		FrameL[index + FRAME_STATIC_FIELD_OFFSET + 1] = payload[index];
+	}
+
+	uint8_t CRCL[FRAME_CRC_LEN] = { 0, 0 };
+	calculate_CRC(FrameL, (uint8_t)(FrameLengthL - FRAME_CRC_LEN), CRCL);
+
+	for (uint8_t index = 0; index < FRAME_CRC_LEN; index++)
+	{
+		uint8_t FrmaeIndexL = index + FRAME_STATIC_FIELD_OFFSET + length + 1;
+		FrameL[FrmaeIndexL] = CRCL[index];
+	}
+
+	// m_port->write(FrameL, FrameLengthL);
+	Serial.write(FrameL, FrameLengthL);
+}
+
+/** @brief Validate the incoming commands.
+ *  @param frame The frame string.
+ *  @return True if successful; or False if failed.
+ */
+bool SUPERClass::validate_frame(uint8_t * frame, uint8_t length)
+{
+	// If frame is less the minimal lent of 6 directly exit.
+	if (length < FRAME_MIN_LEN)
+	{
+		return false;
+	}
+
+	// If frame is less the minimal lent of 32 directly exit.
+	if (length > FRAME_MAX_LEN)
+	{
+		return false;
+	}
+
+	// Check defined size.
+	if (frame[FrameIndexes::Length] != (length - FRAME_STATIC_FIELD_LENGTH))
+	{
+		return false;
+	}
+
+	// Check sentinel value.
+	if (frame[FrameIndexes::Sentinel] != FRAME_SENTINEL)
+	{
+		return false;
+	}
+
+	// Check request or response value.
+	if ((frame[FrameIndexes::FrmType] != FrameType::Request) &&
+		(frame[FrameIndexes::FrmType] != FrameType::Response))
+	{
+		return false;
+	}
+
+	if (validate_CRC(frame, length) == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+/** @brief Validate the CRC.
+ *  @param frame The frame string.
+ *  @return True if successful; or False if failed.
+ */
+bool SUPERClass::validate_CRC(uint8_t * frame, uint8_t length)
+{
+	uint8_t PayloadLen = length - FRAME_CRC_LEN;
+	uint8_t CRCL[FRAME_CRC_LEN] = { 0, 0 };
+
+	calculate_CRC(frame, PayloadLen, CRCL);
+
+	// Check odd byte and even bytes.
+	return (frame[PayloadLen] == CRCL[0]) && (frame[PayloadLen + 1] == CRCL[1]);
+}
+
+/** @brief Calculate the CRC.
+ *  @param frame uint8_t *, The frame.
+ *  @param length uint8_t, Length of the payload.
+ *  @param out uint8_t *, CRC frame.
+ *  @return Void
+ */
+void SUPERClass::calculate_CRC(uint8_t * frame, uint8_t length, uint8_t * out)
+{
+	for (uint8_t index = 0; index < length; index++)
+	{
+		// Odd
+		if ((index % 2 == 0))
+		{
+			// Sum all odd indexes.
+			out[0] ^= frame[index];
+		}
+		// Even
+		else
+		{
+			// Sum all even indexes.
+			out[1] ^= frame[index];
+		}
+	}
+}
+
+/** @brief Extract the payload of the frame.
+ *  @param frame String, Frame.
+ *  @return Void.
+ */
+void SUPERClass::get_payload(uint8_t * frame, uint8_t length, uint8_t * out)
+{
+	uint8_t EndIndexL = frame[FrameIndexes::Length] - 1;
+
+	for (uint8_t index = 0; index < EndIndexL; index++)
+	{
+		out[index] = frame[index + FRAME_STATIC_FIELD_OFFSET];
+	}
+}
+
+/** @brief Extract the payload of the frame.
+ *  @param frame uint8_t *, Frame buffer.
+ *  @param length uint8_t, Length of the frame.
+ *  @return Void.
+ */
+void SUPERClass::clear_frame(uint8_t * frame, uint8_t length)
+{
+	for (uint8_t index = 0; index < length; index++)
+	{
+		frame[index] = 0;
+	}
+}
+
+/** @brief Read incoming commands.
+ *  @return Void.
+ */
+void SUPERClass::read_frame()
+{
+	static uint8_t TemporalDataLengthL = 0;
+	static uint8_t CommStateL = fsSentinel;
+
+
+	// if (m_port->available() < 1)
+	if (Serial.available() < 1)
+	{
+		return;
+	}
+
+	byte InByteL = 0;
+	// while (m_port->available() > 0)
+	while (Serial.available() > 0)
+	{
+		// InByteL = m_port->read();
+		InByteL = Serial.read();
+
+		switch (CommStateL)
+		{
+		case fsSentinel:
+			if (InByteL == FRAME_SENTINEL)
+			{
+				m_frameBuffer[FrameIndexes::Sentinel] = InByteL;
+				//DEBUGLOG("fsSentinel -> fsRequestResponse\r\n");
+				CommStateL = fsRequestResponse;
+			}
+			break;
+
+		case fsRequestResponse:
+			// Check request or response value.
+			if ((InByteL == FrameType::Request) ||
+				(InByteL == FrameType::Response))
+			{
+				m_frameBuffer[FrameIndexes::FrmType] = InByteL;
+				//DEBUGLOG("fsRequestResponse -> fsLength\r\n");
+				CommStateL = fsLength;
+			}
+			else
+			{
+				//DEBUGLOG("fsRequestResponse -> fsSentinel\r\n");
+				CommStateL = fsSentinel;
+			}
+			break;
+
+		case fsLength:
+			if ((InByteL >= 1) &&
+				(InByteL <= 27))
+			{
+				m_frameBuffer[FrameIndexes::Length] = InByteL;
+				//DEBUGLOG("fsLength -> fsOperationCode\r\n");
+				CommStateL = fsOperationCode;
+			}
+			else
+			{
+				//DEBUGLOG("fsLength -> fsSentinel\r\n");
+				CommStateL = fsSentinel;
+			}
+			break;
+
+		case fsOperationCode:
+			m_frameBuffer[FrameIndexes::OperationCode] = InByteL;
+			if (m_frameBuffer[FrameIndexes::Length] > 1)
+			{
+				TemporalDataLengthL = m_frameBuffer[FrameIndexes::Length] - 1;
+				//DEBUGLOG("fsOperationCode -> fsData\r\n");
+				CommStateL = fsData;
+			}
+			else
+			{
+				TemporalDataLengthL = FRAME_CRC_LEN;
+				//DEBUGLOG("fsOperationCode -> fsCRC\r\n");
+				CommStateL = fsCRC;
+			}
+			m_ptrFrameBuffer = &m_frameBuffer[FRAME_REQUEST_STATIC_FIELD_SIZE];
+			break;
+
+		case fsData:
+			*m_ptrFrameBuffer++ = InByteL;
+			if (--TemporalDataLengthL == 0)
+			{
+				TemporalDataLengthL = FRAME_CRC_LEN;
+				//DEBUGLOG("fsData -> fsCRC\r\n");
+				CommStateL = fsCRC;
+			}
+			break;
+
+		case fsCRC:
+			*m_ptrFrameBuffer++ = InByteL;
+			if (--TemporalDataLengthL == 0)
+			{
+				//for (uint8_t index = 0; index < m_frameBuffer[FrameIndexes::Length] + 5; index++)
+				//{
+				//	//DEBUGLOG("%02X ", m_frameBuffer[index]);
+				//}
+				//DEBUGLOG("\r\n");
+
+				if (validate_CRC(m_frameBuffer, m_frameBuffer[FrameIndexes::Length] + FRAME_REQUEST_STATIC_FIELD_SIZE - 1 + FRAME_CRC_LEN))
+				{
+					parse_frame(m_frameBuffer, m_frameBuffer[FrameIndexes::Length] + FRAME_REQUEST_STATIC_FIELD_SIZE - 1);
+				}
+				else
+				{
+					//DEBUGLOG("Invalid CRC\r\n");
+				}
+
+				CommStateL = fsSentinel;
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}
+
+/** @brief Parse and execute the incoming commands.
+ *  @param frame, uint8_t *, The frame array.
+ *  @param length, uint8_t, The frame array length.
+ *  @return Void.
+ */
+void SUPERClass::parse_frame(uint8_t * frame, uint8_t length)
+{
+	if (frame[FrameIndexes::FrmType] == Request)
+	{
+		if (cbRequest != nullptr)
+		{
+			get_payload(frame, length, m_payloadRequest);
+
+			// cbRequest(frame[FrameIndexes::OperationCode], length, m_payloadRequest);
+			cbRequest(frame[FrameIndexes::OperationCode], frame[FrameIndexes::Length], m_payloadRequest);
+		}
+
+		/*
+		if (frame[FrameIndexes::OperationCode] == OpCodes::Ping)
+		{
+			send_raw_response(OpCodes::Ping, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Stop)
+		{
+			// TODO: Create callback.
+			//Robko01.stop_motors();
+
+			send_raw_response(OpCodes::Stop, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Disable)
+		{
+			// TODO: Create callback.
+			//Robko01.disable_motors();
+			// TODO: Move it to callback.
+			//MotorsEnabled_g = false;
+
+			send_raw_response(OpCodes::Disable, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Enable)
+		{
+			// TODO: Create callback.
+			//Robko01.enable_motors();
+			// TODO: Move it to callback.
+			//MotorsEnabled_g = true;
+
+			send_raw_response(OpCodes::Enable, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Clear)
+		{
+			// TODO: Create callback.
+			//Robko01.clear_motors();
+
+			send_raw_response(OpCodes::Clear, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveRelative)
+		{
+			// If it is not enabled, do not execute.
+			if (MotorsEnabled_g == false)
+			{
+				send_raw_response(OpCodes::MoveRelative, StatusCodes::Error, NULL, 0);
+				return;
+			}
+
+			// If it is move, do not execute the command.
+			if (MotorState_g != 0)
+			{
+				m_payloadResponse[0] = MotorState_g;
+				send_raw_response(OpCodes::MoveRelative, StatusCodes::Busy, m_payloadResponse, 1);
+				return;
+			}
+
+			// Extract motion data.
+			get_payload(frame, length, m_payloadRequest);
+
+			// TODO: Move to function.
+			JointPositionUnion Motion;
+			size_t DataLengthL = sizeof(JointPosition_t);
+			for (uint8_t index = 0; index < DataLengthL; index++)
+			{
+				Motion.Buffer[index] = m_payloadRequest[index];
+			}
+
+			// TODO: Create callback.
+			// Set motion data.
+			//Robko01.move_relative(Motion.Value);
+
+			// Respond with success.
+			send_raw_response(OpCodes::MoveRelative, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveAbsolute)
+		{
+			// If it is not enabled, do not execute.
+			if (MotorsEnabled_g == false)
+			{
+				// Respond with error.
+				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Error, NULL, 0);
+
+				// Exit
+				return;
+			}
+
+			// If it is move, do not execute the command.
+			if (MotorState_g != 0)
+			{
+				m_payloadResponse[0] = MotorState_g;
+
+				// Respond with busy.
+				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Busy, m_payloadResponse, 1);
+				
+				// Exit
+				return;
+			}
+
+			// Extract motion data.
+			// TODO: Move to function.
+			get_payload(frame, length, m_payloadRequest);
+			JointPositionUnion Motion;
+			size_t DataLengthL = sizeof(JointPosition_t);
+			for (uint8_t index = 0; index < DataLengthL; index++)
+			{
+				Motion.Buffer[index] = m_payloadRequest[index];
+			}
+
+			// Set motion data.
+			Robko01.move_absolute(Motion.Value);
+
+			// Respond with success.
+			send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::DO)
+		{
+			// Extract port A data.
+			get_payload(frame, length, m_payloadRequest);
+
+			// Set port A.
+			Robko01.set_port_a(m_payloadRequest[0]);
+
+			// Respond with success.
+			send_raw_response(OpCodes::DO, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::DI)
+		{
+			m_payloadResponse[0] = Robko01.get_port_a();
+			DEBUGLOG("Payload: ");
+			DEBUGLOG(m_payloadResponse[0]);
+			DEBUGLOG("\r\n");
+
+			send_raw_response(OpCodes::DI, StatusCodes::Ok, m_payloadResponse, 1);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::IsMoving)
+		{
+			m_payloadResponse[0] = MotorState_g;
+
+			send_raw_response(OpCodes::IsMoving, StatusCodes::Ok, m_payloadResponse, 1);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::CurrentPosition)
+		{
+			CurrentPositions_g.Value = Robko01.get_position();
+
+			send_raw_response(OpCodes::CurrentPosition, StatusCodes::Ok, CurrentPositions_g.Buffer, sizeof(JointPosition_t));
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveSpeed)
+		{
+			// If it is not enabled, do not execute.
+			if (MotorsEnabled_g == false)
+			{
+				send_raw_response(OpCodes::MoveSpeed, StatusCodes::Error, NULL, 0);
+				return;
+			}
+			
+			// Extract motion data.
+			get_payload(frame, length, m_payloadRequest);
+			
+			// TODO: Move to function.
+			JointPositionUnion Motion;
+			uint8_t DataLengthL = frame[FrameIndexes::Length];
+			for (uint8_t index = 0; index < DataLengthL; index++)
+			{
+				Motion.Buffer[index] = m_payloadRequest[index];
+			}
+			
+			// Set motion data.
+			Robko01.move_speed(Motion.Value);
+			
+			// Respond with success.
+			send_raw_response(OpCodes::MoveSpeed, StatusCodes::Ok, NULL, 0);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::SetRobotID)
+		{
+			get_payload(frame, length, m_payloadRequest);
+
+			// TODO: Write to I2C EEPROM.
+			//for (uint8_t index = 0; index < DataLengthL; index++)
+			//{
+			//	Motion.Buffer[index] = m_payloadRequest[index];
+			//}
+			
+
+			send_raw_response(OpCodes::SetRobotID, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::GetRobotID)
+		{
+
+		// TODO: Read from I2C EEPROM.
+		//for (uint8_t index = 0; index < DataLengthL; index++)
+		//{
+		//	m_payloadRequest[index] = Motion.Buffer[index];
+		//}
+		
+
+		send_raw_response(OpCodes::GetRobotID, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
+		}
+		*/
+	}
+	else if (frame[FrameIndexes::FrmType] == FrameType::Response)
+	{
+		/*
+		if (frame[FrameIndexes::OperationCode] == OpCodes::Ping)
+		{
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Stop)
+		{
+		}
+		*/
+	}
+}
+
+/**
+ * @brief Construct a new SUPERClass::SUPERClass object
+ * 
+ */
+SUPERClass::SUPERClass()
+{
+	m_previousMillis = 0;
+	m_currentMillis = 0;
+}
+
+/**
+ * @brief Initialize the SUPER.
+ * 
+ * @param port 
+ */
+void SUPERClass::init(Stream &port)
+{
+	if (&port == &m_port)
+	{
+		return;
+	}
+
+	m_port = &port;
+}
+
+void SUPERClass::update()
+{
+	m_currentMillis = millis();
+
+	if (m_currentMillis - m_previousMillis >= UPDATE_RATE)
+	{
+		// Save the last time you updated the bus.
+		m_previousMillis = m_currentMillis;
+
+		// Read frame form serial.
+		read_frame();
+	}
+}
+
+/** @brief Set the callback.
+ *  @param callback, Callback pointer.
+ *  @return Void.
+ */
+void SUPERClass::setCbRequest(void(*callback)(uint8_t opcode, uint8_t size, uint8_t * payload))
+{
+	cbRequest = callback;
+}
+
+SUPERClass SUPER;
