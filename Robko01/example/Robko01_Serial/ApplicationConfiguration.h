@@ -28,8 +28,27 @@
 	#include "WProgram.h"
 #endif
 
-#define EANBLE_DEBUG_OUT
+#ifdef ESP321
 
+#error "TEST"
+
+#endif
+
+/** @brief Communication port. */
+#define COM_PORT Serial
+
+/** @brief Communication port speed. */
+#define COM_BAUDRATE 115200
+
+/** @brief Communication port time out response time. */
+#define COM_PORT_TIMEOUT 20
+
+
+//#define ENABLE_DEBUG_OUT
+
+#ifndef DEBUGLOG
+#define DEBUGLOG(...)
+#endif // !DEBUGLOG
 
 /** @brief Safety switch pin definition. */
 #define PIN_SS 9
@@ -40,7 +59,47 @@
 /** @brief Additional time schedule divider. */
 #define TIME_SCALER 2
 
-/** @brief Additional time schedule divider. */
-#define TIME_SCALER 2 // 10
+#pragma region Robot Port B pinmap
+ 
+/** @brief Address pin 0. */
+#define PIN_AO0 6
+
+/** @brief Address pin 1. */
+#define PIN_AO1 7
+
+/** @brief Address pin 2. */
+#define PIN_AO2 8
+
+/** @brief Control pin IO write.*/
+#define PIN_IOW A0
+
+/** @brief Control pin IO read.*/
+#define PIN_IOR A1
+
+/** @brief Input data pin 0. */
+#define PIN_DI0 2
+
+/** @brief Input data pin 1. */
+#define PIN_DI1 3
+
+/** @brief Input data pin 2. */
+#define PIN_DI2 4
+
+/** @brief Input data pin 3. */
+#define PIN_DI3 5
+
+/** @brief Output data pin 0. */
+#define PIN_DO0 A6
+
+/** @brief Output data pin 1. */
+#define PIN_DO1 A7
+
+/** @brief Output data pin 2. */
+#define PIN_DO2 A2
+
+/** @brief Output data pin 3. */
+#define PIN_DO3 A3
+
+#pragma endregion
 
 #endif

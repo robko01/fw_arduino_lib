@@ -19,8 +19,8 @@
 	SOFTWARE.
 */
 
-#ifndef _ROBKO01BUSCONTROL_h
-#define _ROBKO01BUSCONTROL_h
+#ifndef _APPLICATIONCONFIGURATION_h
+#define _APPLICATIONCONFIGURATION_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
@@ -28,10 +28,29 @@
 	#include "WProgram.h"
 #endif
 
-//#include "GeneralHelper.h"
+#ifdef ESP321
 
-#pragma region Definitions
+#error "TEST"
 
+#endif
+
+//#define ENABLE_DEBUG_OUT
+
+#ifndef DEBUGLOG
+#define DEBUGLOG(...)
+#endif // !DEBUGLOG
+
+/** @brief Safety switch pin definition. */
+#define PIN_SS 9
+
+/** @brief No Safety Switch - coment to enable. */
+#define NO_SAFETY_SWITCH
+
+/** @brief Additional time schedule divider. */
+#define TIME_SCALER 2
+
+#pragma region Robot Port B pinmap
+ 
 /** @brief Address pin 0. */
 #define PIN_AO0 6
 
@@ -73,38 +92,4 @@
 
 #pragma endregion
 
-/** @brief Set address bus.
- *  @param uint8_t address, Address bus value.
- *  @return Void.
- */
-void setup_bus();
-
-/** @brief Set address bus.
- *  @param uint8_t address, Address bus value.
- *  @return Void.
- */
-void set_address_bus(uint8_t address);
-
-/** @brief Generate IO Write signal.
- *  @return Void.
- */
-void iow();
-
-/** @brief Generate IO Read signal.
- *  @return Void.
- */
-void ior();
-
-/** @brief Read digital signal of the outputs.
- *  @return uint8_t, state of the pins.
- */
-uint8_t read_do();
-
-/** @brief Write digital signal of the inputs.
- *  @param State of the digital inputs.
- *  @return Void.
- */
-void write_di(uint8_t data);
-
 #endif
-
