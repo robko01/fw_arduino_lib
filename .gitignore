@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++
-# Edit at https://www.toptal.com/developers/gitignore?templates=visualstudiocode,c++
+# Created by https://www.toptal.com/developers/gitignore/api/vscode,c++
+# Edit at https://www.toptal.com/developers/gitignore?templates=vscode,c++
 
 ### C++ ###
 # Prerequisites
@@ -15,6 +15,12 @@
 # Precompiled Headers
 *.gch
 *.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
 
 # Compiled Dynamic libraries
 *.so
@@ -36,7 +42,7 @@
 *.out
 *.app
 
-### VisualStudioCode ###
+### vscode ###
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -44,8 +50,4 @@
 !.vscode/extensions.json
 *.code-workspace
 
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-.history
-
-# End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,c++
+# End of https://www.toptal.com/developers/gitignore/api/vscode,c++
