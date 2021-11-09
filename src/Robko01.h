@@ -75,6 +75,12 @@
 /* Stepper motor controller. */
 #include <AccelStepper.h>
 
+/**
+ * @brief Maximum stapes per second for one motor.
+ * 
+ */
+#define MAX_SPEED_OFFSET 0
+
 #pragma endregion
 
 #pragma region Enums
