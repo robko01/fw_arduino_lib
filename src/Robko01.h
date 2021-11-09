@@ -19,45 +19,54 @@
 	SOFTWARE.
 */
 
-// OperationsCodes.h
+// Robko01.h
 
 #ifndef _ROBKO01_h
 #define _ROBKO01_h
 
-/** @brief Count of the robot axises. */
+#pragma region Definitions
+
+#define IOWR_TIME 1UL
+
+/**
+ * @brief Slow motion debug flag.
+ * 
+ */
+
+/**
+ * @brief Count of the robot axises.
+ * 
+ */
 #define AXIS_COUNT 6
 
-/** @brief Base address axis. */
-#define AXIS_BASE 0
-
-/** @brief Shoulder address axis. */
-#define AXIS_SHOULDER 1
-
-/** @brief Elbow address axis. */
-#define AXIS_ELBOW 2
-
-/** @brief Left different address axis. */
-#define AXIS_LEFT_DIFFERENT 3
-
-/** @brief Right different address axis. */
-#define AXIS_RIGHT_DIFFERENT 4
-
-/** @brief Gripper address axis. */
-#define AXIS_GRIPPER 5
-
-#define PORT_A_1 6
-
-#define PORT_A_2 7
-
+/**
+ * @brief Count of robot address
+ * 
+ */
 #define ADDRESS_COUNT 8
 
+/**
+ * @brief Default acceleration.
+ * 
+ */
 #define DEFAULT_ACCELERATION 500.0f //250
+
+#pragma endregion
+
+#pragma region Headres
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
+
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+#endif
+#define USE_MILLIS
+
+
+#include "DebugPort.h"
 
 #include "BusConfig.h"
 
@@ -66,12 +75,34 @@
 /* Stepper motor controller. */
 #include <AccelStepper.h>
 
+#pragma endregion
+
+#pragma region Enums
+
+/**
+ * @brief Address Index
+ * 
+ */
+enum AddressIndex : uint8_t
+{
+    Base = 0,
+    Shoulder = 1,
+    Elbow = 2,
+    DiffLeft = 3,
+    DiffRight = 4,
+    Gripper = 5,
+    PortA1 = 6,
+    PortA2 = 7
+};
+
 enum OperationModes : uint8_t
 {
 	NONE = 0U,
 	Positioning,
 	Speed,
 };
+
+#pragma endregion
 
 class Robko01Class
 {
@@ -80,29 +111,76 @@ class Robko01Class
 
 #pragma region Variables
 
+    /**
+     * @brief Time now (current moment).
+     * 
+     */
+	unsigned long m_timeNow;
+
+    /**
+     * @brief Time before (last moment).
+     * 
+     */
+	unsigned long m_timePrev;
+
+    /**
+     * @brief Update rate.
+     * 
+     */
+    unsigned long m_updateRate;
+
+    /**
+     * @brief Motor enabled flag.
+     * 
+     */
     bool m_motorsEnabled;
 
+    /**
+     * @brief Bus configuration.
+     * 
+     */
 	BusConfig_t m_BusConfig;
 
-    /** @brief Port A input low 4 bits. */
+    /**
+     * @brief Port A input low 4 bits.
+     * 
+     */
     uint8_t m_currentAddressIndex;
 
-    /** @brief Port A input low 4 bits. */
+    /**
+     * @brief Port A input low 4 bits.
+     * 
+     */
     uint8_t m_portLoAIn;
 
-    /** @brief Port A input high 4 bits. */
+    /**
+     * @brief Port A input high 4 bits.
+     * 
+     */
     uint8_t m_portHiAIn;
 
-    /** @brief Port A output. */
+    /**
+     * @brief Port A output.
+     * 
+     */
     uint8_t m_portAOut;
 
-    /** @brief Motor states, does it active. */
+    /**
+     * @brief Motor states, does it active.
+     * 
+     */
     uint8_t m_motorState;
 
-    /** @brief Operation mode. */
+    /**
+     * @brief Operation mode.
+     * 
+     */
     uint8_t m_operationMode;
 
-    /** @brief Create 6 stepper motors. */
+    /**
+     * @brief Create 6 stepper motors.
+     * 
+     */
     AccelStepper m_steppers[AXIS_COUNT];
 
 #pragma endregion
