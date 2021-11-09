@@ -12,10 +12,10 @@ void Robko01Class::iow() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	delayMicroseconds(500);
+	delayMicroseconds(100);
 	// delay(1);
 	digitalWrite(m_BusConfig.IOW, LOW);
-	delayMicroseconds(500);
+	delayMicroseconds(100);
 	// delay(1);
 	digitalWrite(m_BusConfig.IOW, HIGH);
 }
@@ -32,9 +32,9 @@ void Robko01Class::ior() {
 #endif // SHOW_FUNC_NAMES
 
 	// delay(1);
-	delayMicroseconds(500);
+	delayMicroseconds(100);
 	digitalWrite(m_BusConfig.IOR, LOW);
-	delayMicroseconds(500);
+	delayMicroseconds(100);
 	// delay(1);
 	digitalWrite(m_BusConfig.IOR, HIGH);
 }
@@ -265,7 +265,7 @@ void Robko01Class::init(BusConfig_t* config) {
 
 	m_motorsEnabled = false;
 
-	m_updateRate = 5UL;
+	m_updateRate = 1UL;
 
     setup_bus();
     setup_robot();
