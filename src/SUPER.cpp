@@ -28,6 +28,11 @@
  *  @return Void.
  */
 void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8_t length) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
 
 	const int FrameLengthL = length + FRAME_STATIC_FIELD_LENGTH + 1;
 
@@ -51,8 +56,7 @@ void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8
 		FrameL[FrmaeIndexL] = CRCL[index];
 	}
 
-	// m_port->write(FrameL, FrameLengthL);
-	Serial.write(FrameL, FrameLengthL);
+	m_port->write(FrameL, FrameLengthL);
 }
 
 /** @brief Send RAW response frame.
@@ -62,6 +66,11 @@ void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8
  *  @return Void.
  */
 void SUPERClass::send_raw_response(uint8_t opcode, uint8_t status, uint8_t * payload, const uint8_t length) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
 
 	const int FrameLengthL = length + FRAME_STATIC_FIELD_LENGTH + FRAME_RESPONSE_PAYLOAD_OFFSET;
 
@@ -86,8 +95,7 @@ void SUPERClass::send_raw_response(uint8_t opcode, uint8_t status, uint8_t * pay
 		FrameL[FrmaeIndexL] = CRCL[index];
 	}
 
-	// m_port->write(FrameL, FrameLengthL);
-	Serial.write(FrameL, FrameLengthL);
+	m_port->write(FrameL, FrameLengthL);
 }
 
 /** @brief Validate the incoming commands.
@@ -205,24 +213,26 @@ void SUPERClass::clear_frame(uint8_t * frame, uint8_t length)
 /** @brief Read incoming commands.
  *  @return Void.
  */
-void SUPERClass::read_frame()
-{
+void SUPERClass::read_frame() {
+#ifdef SHOW_FUNC_NAMES1
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
+
 	static uint8_t TemporalDataLengthL = 0;
 	static uint8_t CommStateL = fsSentinel;
 
 
-	// if (m_port->available() < 1)
-	if (Serial.available() < 1)
+	if (m_port->available() < 1)
 	{
 		return;
 	}
 
 	byte InByteL = 0;
-	// while (m_port->available() > 0)
-	while (Serial.available() > 0)
+	while (m_port->available() > 0)
 	{
-		// InByteL = m_port->read();
-		InByteL = Serial.read();
+		InByteL = m_port->read();
 
 		switch (CommStateL)
 		{
@@ -230,8 +240,10 @@ void SUPERClass::read_frame()
 			if (InByteL == FRAME_SENTINEL)
 			{
 				m_frameBuffer[FrameIndexes::Sentinel] = InByteL;
-				//DEBUGLOG("fsSentinel -> fsRequestResponse\r\n");
 				CommStateL = fsRequestResponse;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsSentinel -> fsRequestResponse\r\n");
+#endif
 			}
 			break;
 
@@ -241,13 +253,17 @@ void SUPERClass::read_frame()
 				(InByteL == FrameType::Response))
 			{
 				m_frameBuffer[FrameIndexes::FrmType] = InByteL;
-				//DEBUGLOG("fsRequestResponse -> fsLength\r\n");
 				CommStateL = fsLength;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsRequestResponse -> fsLength\r\n");
+#endif
 			}
 			else
 			{
-				//DEBUGLOG("fsRequestResponse -> fsSentinel\r\n");
 				CommStateL = fsSentinel;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsRequestResponse -> fsSentinel\r\n");
+#endif
 			}
 			break;
 
@@ -256,13 +272,17 @@ void SUPERClass::read_frame()
 				(InByteL <= 27))
 			{
 				m_frameBuffer[FrameIndexes::Length] = InByteL;
-				//DEBUGLOG("fsLength -> fsOperationCode\r\n");
 				CommStateL = fsOperationCode;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsLength -> fsOperationCode\r\n");
+#endif
 			}
 			else
 			{
-				//DEBUGLOG("fsLength -> fsSentinel\r\n");
 				CommStateL = fsSentinel;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsLength -> fsSentinel\r\n");
+#endif
 			}
 			break;
 
@@ -271,14 +291,18 @@ void SUPERClass::read_frame()
 			if (m_frameBuffer[FrameIndexes::Length] > 1)
 			{
 				TemporalDataLengthL = m_frameBuffer[FrameIndexes::Length] - 1;
-				//DEBUGLOG("fsOperationCode -> fsData\r\n");
 				CommStateL = fsData;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsOperationCode -> fsData\r\n");
+#endif
 			}
 			else
 			{
 				TemporalDataLengthL = FRAME_CRC_LEN;
-				//DEBUGLOG("fsOperationCode -> fsCRC\r\n");
 				CommStateL = fsCRC;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsOperationCode -> fsCRC\r\n");
+#endif
 			}
 			m_ptrFrameBuffer = &m_frameBuffer[FRAME_REQUEST_STATIC_FIELD_SIZE];
 			break;
@@ -288,8 +312,10 @@ void SUPERClass::read_frame()
 			if (--TemporalDataLengthL == 0)
 			{
 				TemporalDataLengthL = FRAME_CRC_LEN;
-				//DEBUGLOG("fsData -> fsCRC\r\n");
 				CommStateL = fsCRC;
+#ifdef SHOW_STATES
+				DEBUGLOG("fsData -> fsCRC\r\n");
+#endif
 			}
 			break;
 
@@ -297,11 +323,15 @@ void SUPERClass::read_frame()
 			*m_ptrFrameBuffer++ = InByteL;
 			if (--TemporalDataLengthL == 0)
 			{
-				//for (uint8_t index = 0; index < m_frameBuffer[FrameIndexes::Length] + 5; index++)
-				//{
-				//	//DEBUGLOG("%02X ", m_frameBuffer[index]);
-				//}
-				//DEBUGLOG("\r\n");
+				for (uint8_t index = 0; index < m_frameBuffer[FrameIndexes::Length] + 5; index++)
+				{
+#ifdef SHOW_STATES
+					DEBUGLOG("%02X ", m_frameBuffer[index]);
+#endif
+				}
+#ifdef SHOW_STATES
+				DEBUGLOG("\r\n");
+#endif
 
 				if (validate_CRC(m_frameBuffer, m_frameBuffer[FrameIndexes::Length] + FRAME_REQUEST_STATIC_FIELD_SIZE - 1 + FRAME_CRC_LEN))
 				{
@@ -309,7 +339,9 @@ void SUPERClass::read_frame()
 				}
 				else
 				{
-					//DEBUGLOG("Invalid CRC\r\n");
+#ifdef SHOW_STATES
+					DEBUGLOG("Invalid CRC\r\n");
+#endif
 				}
 
 				CommStateL = fsSentinel;
@@ -564,12 +596,29 @@ SUPERClass::SUPERClass()
  * 
  * @param port 
  */
-void SUPERClass::init(Stream &port)
-{
+void SUPERClass::init(Stream &port){
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
+
+#ifdef ESP32
+
+	if (&port == m_port)
+	{
+		return;
+	}
+
+#else
+
 	if (&port == &m_port)
 	{
 		return;
 	}
+
+#endif
+
 
 	m_port = &port;
 }
@@ -592,8 +641,13 @@ void SUPERClass::update()
  *  @param callback, Callback pointer.
  *  @return Void.
  */
-void SUPERClass::setCbRequest(void(*callback)(uint8_t opcode, uint8_t size, uint8_t * payload))
-{
+void SUPERClass::setCbRequest(void(*callback)(uint8_t opcode, uint8_t size, uint8_t * payload)) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
+
 	cbRequest = callback;
 }
 

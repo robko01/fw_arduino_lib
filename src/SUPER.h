@@ -22,20 +22,12 @@
 #ifndef _SUPER_h
 #define _SUPER_h
 
-#pragma region Headers
-
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
-#else
-	#include "WProgram.h"
-#endif
-
-#pragma endregion
-
 #pragma region Definitions
 
+//#define SHOW_STATES
+
 /** @brief Communication port update rate. */
-#define UPDATE_RATE 33
+#define UPDATE_RATE 22
 
 /** @brief Minimum frame length. */
 #define FRAME_MIN_LEN 6
@@ -73,6 +65,18 @@
  * 1 - OpCode
  */
 #define FRAME_REQUEST_STATIC_FIELD_SIZE 4
+
+#pragma endregion
+
+#pragma region Headers
+
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "Arduino.h"
+#else
+	#include "WProgram.h"
+#endif
+
+#include "DebugPort.h"
 
 #pragma endregion
 
