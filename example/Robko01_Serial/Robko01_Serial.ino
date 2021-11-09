@@ -137,8 +137,8 @@ void setup()
         PIN_AO0,
         PIN_AO1,
         PIN_AO2,
-        PIN_IOW,
         PIN_IOR,
+        PIN_IOW,
         PIN_DI0,
         PIN_DI1,
         PIN_DI2,
@@ -161,7 +161,7 @@ void setup()
 	SUPER.setCbRequest(cbRequestHandler);
 
 	// Setup timer 2.
-	set_timer_2();
+	//set_timer_2();
 }
 
 /**
@@ -172,14 +172,14 @@ void loop()
 {
 	SUPER.update();
 
-	if (Timer2Event_g && SafetyStopFlag_g == LOW)
-	{
-		// Switch off the bit.
-		Timer2Event_g = 0;
+	// if (Timer2Event_g && SafetyStopFlag_g == LOW)
+	// {
+	// 	// Switch off the bit.
+	// 	Timer2Event_g = 0;
+	// }
 
-        Robko01.update();
-        MotorState_g = Robko01.get_motor_state();
-	}
+    Robko01.update();
+    MotorState_g = Robko01.get_motor_state();
 
 	if (MotorState_g == 0 && StorePosition_g)
 	{
@@ -240,6 +240,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
 			SUPER.send_raw_response(opcode, StatusCodes::Error, NULL, 0);
 			return;
 		}
+
 		// If it is move, do not execute the command.
 		if (MotorState_g != 0)
 		{
@@ -258,6 +259,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
 
 		// Set motion data.
 		Robko01.move_relative(Motion.Value);
+
 		// Respond with success.
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
 	}
