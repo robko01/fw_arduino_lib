@@ -28,11 +28,22 @@
 	#include "WProgram.h"
 #endif
 
-#ifdef ESP321
+#pragma region Common
 
-#error "TEST"
+//#define ENABLE_DEBUG_PORT
 
-#endif
+/** @brief Safety switch pin definition. */
+#define PIN_SS 9
+
+/** @brief No Safety Switch - coment to enable. */
+#define NO_SAFETY_SWITCH
+
+/** @brief Additional time schedule divider. */
+#define TIME_SCALER 2
+
+#pragma endregion
+
+#pragma region Serial Port
 
 /** @brief Communication port. */
 #define COM_PORT Serial
@@ -43,21 +54,7 @@
 /** @brief Communication port time out response time. */
 #define COM_PORT_TIMEOUT 20
 
-
-//#define ENABLE_DEBUG_OUT
-
-#ifndef DEBUGLOG
-#define DEBUGLOG(...)
-#endif // !DEBUGLOG
-
-/** @brief Safety switch pin definition. */
-#define PIN_SS 9
-
-/** @brief No Safety Switch - coment to enable. */
-#define NO_SAFETY_SWITCH
-
-/** @brief Additional time schedule divider. */
-#define TIME_SCALER 2
+#pragma endregion
 
 #pragma region Robot Port B pinmap
  
