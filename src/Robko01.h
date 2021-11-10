@@ -26,13 +26,6 @@
 
 #pragma region Definitions
 
-#define IOWR_TIME 1UL
-
-/**
- * @brief Slow motion debug flag.
- * 
- */
-
 /**
  * @brief Count of the robot axises.
  * 
@@ -49,7 +42,7 @@
  * @brief Default acceleration.
  * 
  */
-#define DEFAULT_ACCELERATION 500.0f //250
+#define DEFAULT_ACCELERATION 700.0f //250
 
 #pragma endregion
 
