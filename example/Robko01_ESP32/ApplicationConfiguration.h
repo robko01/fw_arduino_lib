@@ -34,67 +34,51 @@
 
 #endif
 
+/** @brief Firmware version string. */
+#define ESP_FW_VERSION 1
+
 #define SERVICE_PORT 10182
-
-//#define ENABLE_DEBUG_OUT
-
-#ifndef DEBUGLOG
-#define DEBUGLOG(...)
-#endif // !DEBUGLOG
-
-
-/** @brief Safety switch pin definition. */
-#define PIN_SS 9
-
-/** @brief No Safety Switch - coment to enable. */
-#define NO_SAFETY_SWITCH
-
-/** @brief Additional time schedule divider. */
-#define TIME_SCALER 2
-
-/** @brief Additional time schedule divider. */
-#define TIME_SCALER 2 // 10
 
 #pragma region Definitions
 
 /** @brief Address pin 0. */
-#define PIN_AO0 6
+#define PIN_AO0 33
 
 /** @brief Address pin 1. */
-#define PIN_AO1 7
+#define PIN_AO1 25
 
 /** @brief Address pin 2. */
-#define PIN_AO2 8
+#define PIN_AO2 26
 
 /** @brief Control pin IO write.*/
-#define PIN_IOW A0
+#define PIN_IOW 32
 
 /** @brief Control pin IO read.*/
-#define PIN_IOR A1
+#define PIN_IOR 5
 
 /** @brief Input data pin 0. */
-#define PIN_DI0 2
+#define PIN_DI0 13
 
 /** @brief Input data pin 1. */
-#define PIN_DI1 3
+#define PIN_DI1 12
 
 /** @brief Input data pin 2. */
-#define PIN_DI2 4
+#define PIN_DI2 14
 
 /** @brief Input data pin 3. */
-#define PIN_DI3 5
+#define PIN_DI3 27
 
 /** @brief Output data pin 0. */
-#define PIN_DO0 A6
+#define PIN_DO0 35
 
 /** @brief Output data pin 1. */
-#define PIN_DO1 A7
+#define PIN_DO1 35
 
 /** @brief Output data pin 2. */
-#define PIN_DO2 A2
+#define PIN_DO2 35
 
 /** @brief Output data pin 3. */
-#define PIN_DO3 A3
+#define PIN_DO3 35
 
 #pragma endregion
 

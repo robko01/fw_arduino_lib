@@ -39,16 +39,18 @@
 	Access table: http://www.slideshare.net/orlin369/access-tablerobko01
 	Schematic:    http://www.slideshare.net/orlin369/main-board-of-robko01-micro-robot-robotic-hand
 	Generate graphviz graph: python cppdepends.py "~\Robko01\OrlinDimitrov\Firmware\ArduinoRobko01\ArduinoRobko01" ArduinoRobko01.pdf 50
-	Graphviz viewr: http://www.webgraphviz.com/
+	Graphviz viewer: http://www.webgraphviz.com/
 */
 
-#ifdef ESP321
-
-#error "TEST"
-
-#endif
-
 #pragma region Headers
+
+#ifdef ESP32
+#include <WiFi.h>
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#include <ESPAsyncTCP.h>
+#include <ESP8266mDNS.h>
+#endif
 
 #include "ApplicationConfiguration.h"
 
@@ -66,14 +68,16 @@
 
 #include "OperationsCodes.h"
 
-#include <WiFi.h>
+#include "DefaultCredentials.h"
+
+#include "GeneralHelper.h"
 
 #pragma endregion
 
 #pragma region Prototypes
 
 /**
- * @brief CAllback handler function.
+ * @brief Callback handler function.
  * 
  * @param opcode Operation code of the call.
  * @param size Size of the payload.
@@ -81,21 +85,9 @@
  */
 void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload);
 
-/**
- * @brief Set the timer 2.
- * 
- */
-void set_timer_2();
-
 #pragma endregion
 
 #pragma region Variables
-
-/**
- * @brief Timer event lock bit.
- * 
- */
-volatile uint8_t Timer2Event_g;
 
 /**
  * @brief Motors state bits.
@@ -121,9 +113,35 @@ int SafetyStopFlag_g;
  */
 JointPositionUnion CurrentPositions_g;
 
+#ifdef DEAFULT_CREDENTIALS_H_
+
+/**
+ * @brief SSID
+ * 
+ */
+const char* SSID_g = DEFAULT_SSID;
+
+/**
+ * @brief Password
+ * 
+ */
+const char* PASS_g = DEFAULT_PASS;
+
+#else
+
+/**
+ * @brief SSID
+ * 
+ */
 const char* SSID_g = "yourssid";
 
+/**
+ * @brief Password
+ * 
+ */
 const char* PASS_g = "yourpasswd";
+
+#endif
 
 WiFiServer TCPServer_g(SERVICE_PORT);
 
@@ -135,7 +153,6 @@ WiFiServer TCPServer_g(SERVICE_PORT);
  */
 void setup()
 {
-	Timer2Event_g = 0;
 	SafetyStopFlag_g = LOW;
 	MotorState_g = 0;
 	StorePosition_g = true;
@@ -145,8 +162,8 @@ void setup()
         PIN_AO0,
         PIN_AO1,
         PIN_AO2,
-        PIN_IOW,
         PIN_IOR,
+        PIN_IOW,
         PIN_DI0,
         PIN_DI1,
         PIN_DI2,
@@ -157,6 +174,10 @@ void setup()
         PIN_DO3,
 	};
 
+	setup_debug_port();
+
+	show_device_properties();
+
 	// Initialize the robot controller.
 	Robko01.init(&config);
 
@@ -165,9 +186,6 @@ void setup()
 
 	// Initialize the SUPER protocol parser.
 	SUPER.setCbRequest(cbRequestHandler);
-
-	// Setup timer 2.
-	set_timer_2();
 }
 
 /**
@@ -176,13 +194,10 @@ void setup()
  */
 void loop()
 {
-	update_communication();
+	//update_communication();
 
-	if (Timer2Event_g == 1 && SafetyStopFlag_g == LOW)
+	if (SafetyStopFlag_g == LOW)
 	{
-		// Switch off the bit.
-		Timer2Event_g = 0;
-
         Robko01.update();
         MotorState_g = Robko01.get_motor_state();
 	}
@@ -201,8 +216,17 @@ void loop()
 
 #pragma region Functions
 
-void init_communication()
-{
+/**
+ * @brief Initialize the communication.
+ * 
+ */
+void init_communication() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
 	// start the Wi-Fi connection and the server:
     WiFi.begin(SSID_g, PASS_g);
 
@@ -211,12 +235,14 @@ void init_communication()
         delay(500);
         Serial.print(".");
     }
-
-    Serial.println("");
-    Serial.println("WiFi connected.");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
 	
+	DEBUGLOG("\r\n");
+	DEBUGLOG("Connected:  %s\r\n", SSID_g);
+	DEBUGLOG("IP Address: %s\r\n", WiFi.localIP().toString().c_str());
+	DEBUGLOG("Gateway:    %s\r\n", WiFi.gatewayIP().toString().c_str());
+	DEBUGLOG("DNS:        %s\r\n", WiFi.dnsIP().toString().c_str());
+	DEBUGLOG("\r\n");
+
 	// Start the server.
 	TCPServer_g.begin();
 }
@@ -225,37 +251,62 @@ void init_communication()
  * @brief Update communication.
  * 
  */
-void update_communication()
-{
-	// Listen for incoming clients.
-	WiFiClient ClientL = TCPServer_g.available();
+void update_communication() {
+#ifdef SHOW_FUNC_NAMES1
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
 
-	if (ClientL)
+	static uint8_t StateL = 0;
+	
+	static WiFiClient ClientL;
+	
+	if (StateL == 0)
 	{
-		SUPER.init(ClientL);
+		// Listen for incoming clients.
+		ClientL = TCPServer_g.available();
 
+		if (ClientL)
+		{
+			SUPER.init(ClientL);
+			StateL = 1;
+			DEBUGLOG("Connected...\r\n");
+		}
+	}
+	if (StateL == 1)
+	{
 		if (ClientL.connected())
 		{
-			// Update the data processing.
 			SUPER.update();
 		}
 		else
 		{
-		    // Close the connection.
-		    ClientL.stop();
+			StateL = 2;
 		}
+	}
+	if (StateL == 2)
+	{
+		ClientL.stop();
+		StateL = 0;
+		DEBUGLOG("Disconnected...\r\n");
 	}
 }
 
 /**
- * @brief CAllback handler function.
+ * @brief Callback handler function.
  * 
  * @param opcode Operation code of the call.
  * @param size Size of the payload.
  * @param payload Payload data.
  */
-void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
-{
+void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
 	if (opcode == OpCodes::Ping)
 	{
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
@@ -421,55 +472,6 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
 		//}
 		
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
-	}
-}
-
-#pragma endregion
-
-#pragma region Timer 2
-
-/**
- * @brief Set the timer 2.
- * 
- */
-void set_timer_2()
-{
-	// Set point of the timer is: 1250Hz.
-	// 16000000 / 64         / 250   = 1000
-	// 16000000 / 64         / 200   = 1250
-	// 16000000 / 64         / 150   = 1666.(6)
-	// 16000000 / 64         / 100   = 2500
-	// 16000000 / 64         / 50   = 5000
-	// Fosc     / pre scaler / OCR2A = time tics[Hz]
-
-	// Disable global interrupts.
-	cli();
-	// Set timer mode to CTC.
-	TCCR2A = (1 << WGM21);
-	// Set timer 2 bits for 64 pre scaler:
-	TCCR2B = (4 << CS20);
-	// Clear Timer 2.
-	TCNT2 = 0;
-	// Set point.
-	OCR2A = 200; // 250 
-	// Set the enable interrupt.
-	TIMSK2 = (1 << OCIE2A);
-	// Enable global interrupts:
-	sei();
-}
-
-/**
- * @brief Timer 2 interrupt sub routine.
- * 
- */
-ISR(TIMER2_COMPA_vect)
-{
-	static uint16_t Timer2DividerL = 0;
-	// Tell everyone the time was finish its job.
-	if (++Timer2DividerL >= TIME_SCALER)
-	{
-		Timer2DividerL = 0;
-		Timer2Event_g = 1;
 	}
 }
 
