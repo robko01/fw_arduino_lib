@@ -274,12 +274,7 @@ void Robko01Class::init(BusConfig_t* config) {
 void Robko01Class::update()
 {
 	// Update time.
-#ifdef USE_MILLIS
 	m_timeNow = millis();
-#else
-	m_timeNow = micros();
-#endif
-
 
 	if ((m_timeNow - m_timePrev) >= m_updateRate)
 	{
@@ -287,7 +282,7 @@ void Robko01Class::update()
 		if (m_currentAddressIndex < AXIS_COUNT)
 		{
 			// Update motor state.
-			m_steppers[m_currentAddressIndex].disableOutputs();
+			// m_steppers[m_currentAddressIndex].disableOutputs();
 			m_steppers[m_currentAddressIndex].enableOutputs();
 			set_address_bus(m_currentAddressIndex);
 			m_motorState = update_motor(m_currentAddressIndex);

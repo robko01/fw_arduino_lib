@@ -56,8 +56,6 @@
 
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 #endif
-#define USE_MILLIS
-
 
 #include "DebugPort.h"
 
