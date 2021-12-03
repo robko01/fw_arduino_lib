@@ -6,7 +6,7 @@
  * 
  */
 void Robko01Class::iow() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -25,7 +25,7 @@ void Robko01Class::iow() {
  * 
  */
 void Robko01Class::ior() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -45,7 +45,7 @@ void Robko01Class::ior() {
  * @param uint8_t address, Address bus value.
  */
 void Robko01Class::set_address_bus(uint8_t address) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -70,7 +70,7 @@ void Robko01Class::set_address_bus(uint8_t address) {
  * @return uint8_t, state of the pins.
  */
 uint8_t Robko01Class::read_do() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -92,7 +92,7 @@ uint8_t Robko01Class::read_do() {
  * @param State of the digital inputs.
  */
 void Robko01Class::write_di(uint8_t data) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -220,7 +220,7 @@ uint8_t Robko01Class::update_motor(uint8_t address) {
  * @param uint8_t address, Sub address of the port.
  */
 void Robko01Class::update_port_a(uint8_t address) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -267,12 +267,16 @@ void Robko01Class::init(BusConfig_t* config) {
 
 	m_updateRate = 1UL;
 
-    setup_bus();
     setup_robot();
 }
 
-void Robko01Class::update()
-{
+void Robko01Class::update() {
+#ifdef SHOW_FUNC_NAMES_S
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
 	// Update time.
 	m_timeNow = millis();
 
@@ -332,7 +336,7 @@ bool Robko01Class::motors_enabled() {
  * @return uint8_t 
  */
 uint8_t Robko01Class::get_motor_state() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
