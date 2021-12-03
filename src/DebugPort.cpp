@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 void setup_debug_port()
 {
-#ifdef SERIALLOG
 	DBG_OUTPUT_PORT.begin(DBG_OUTPUT_PORT_BAUDRATE, SERIAL_8N1);
 	DBG_OUTPUT_PORT.print("\r\n\r\n\r\n");
 	DBG_OUTPUT_PORT.setDebugOutput(true);
@@ -40,6 +39,5 @@ void setup_debug_port()
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
-#endif // SERIALLOG
 }
 
