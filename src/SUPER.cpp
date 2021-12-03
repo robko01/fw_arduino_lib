@@ -28,7 +28,7 @@
  *  @return Void.
  */
 void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8_t length) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -66,7 +66,7 @@ void SUPERClass::send_raw_request(uint8_t opcode, uint8_t * payload, const uint8
  *  @return Void.
  */
 void SUPERClass::send_raw_response(uint8_t opcode, uint8_t status, uint8_t * payload, const uint8_t length) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -214,7 +214,7 @@ void SUPERClass::clear_frame(uint8_t * frame, uint8_t length)
  *  @return Void.
  */
 void SUPERClass::read_frame() {
-#ifdef SHOW_FUNC_NAMES1
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -596,7 +596,7 @@ SUPERClass::SUPERClass()
  * 
  * @param port 
  */
-void SUPERClass::init(Stream &port){
+void SUPERClass::init(Stream &port) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
@@ -623,8 +623,13 @@ void SUPERClass::init(Stream &port){
 	m_port = &port;
 }
 
-void SUPERClass::update()
-{
+void SUPERClass::update() {
+#ifdef SHOW_FUNC_NAMES_S
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif
+
 	m_currentMillis = millis();
 
 	if (m_currentMillis - m_previousMillis >= UPDATE_RATE)

@@ -24,7 +24,7 @@
 
 #pragma region Definitions
 
-//#define SHOW_STATES
+// #define SHOW_STATES
 
 /** @brief Communication port update rate. */
 #define UPDATE_RATE 22
