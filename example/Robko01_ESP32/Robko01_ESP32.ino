@@ -42,15 +42,30 @@
 	Graphviz viewer: http://www.webgraphviz.com/
 */
 
+/*
+ 
++------+----------+-----------+
+| Axis |   Sign   | Direction |
++------+----------+-----------+
+|    0 | Positive | CCW       |
+|    0 | Negative | CW        |
+|    1 | Positive | Forward   |
+|    1 | Negative | Backward  |
+|    2 | Positive | Backward  |
+|    2 | Negative | Forward   |
+|    3 | Positive | Down      |
+|    3 | Negative | Up        |
+|    4 | Positive | CW        |
+|    4 | Negative | CCW       |
+|    5 | Positive | Open      |
+|    5 | Negative | Close     |
++------+----------+-----------+
+
+*/
+
 #pragma region Headers
 
-#ifdef ESP32
 #include <WiFi.h>
-#elif defined(ESP8266)
-#include <ESP8266WiFi.h>
-#include <ESPAsyncTCP.h>
-#include <ESP8266mDNS.h>
-#endif
 
 #include "ApplicationConfiguration.h"
 
@@ -194,7 +209,7 @@ void setup()
  */
 void loop()
 {
-	//update_communication();
+	update_communication();
 
 	if (SafetyStopFlag_g == LOW)
 	{
@@ -252,7 +267,7 @@ void init_communication() {
  * 
  */
 void update_communication() {
-#ifdef SHOW_FUNC_NAMES1
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -301,7 +316,7 @@ void update_communication() {
  * @param payload Payload data.
  */
 void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");

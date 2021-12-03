@@ -28,18 +28,12 @@
 	#include "WProgram.h"
 #endif
 
-#ifdef ESP321
-
-#error "TEST"
-
-#endif
-
 /** @brief Firmware version string. */
 #define ESP_FW_VERSION 1
 
 #define SERVICE_PORT 10182
 
-#pragma region Definitions
+#pragma region IO Pins Definitions
 
 /** @brief Address pin 0. */
 #define PIN_AO0 33
@@ -54,7 +48,7 @@
 #define PIN_IOW 32
 
 /** @brief Control pin IO read.*/
-#define PIN_IOR 5
+#define PIN_IOR 23
 
 /** @brief Input data pin 0. */
 #define PIN_DI0 13
@@ -72,13 +66,13 @@
 #define PIN_DO0 35
 
 /** @brief Output data pin 1. */
-#define PIN_DO1 35
+#define PIN_DO1 34
 
 /** @brief Output data pin 2. */
-#define PIN_DO2 35
+#define PIN_DO2 39
 
 /** @brief Output data pin 3. */
-#define PIN_DO3 35
+#define PIN_DO3 36
 
 #pragma endregion
 
