@@ -145,13 +145,6 @@ void show_device_properties() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#if defined(ESP8266) || defined(ESP32)
-
-#if defined(ESP8266)
-// ESP8266
-	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
-#endif
-
 	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
 	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
 	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
@@ -159,11 +152,7 @@ void show_device_properties() {
 	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
 	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
 	DEBUGLOG("\r\n");
-
-#endif
 }
-
-#ifdef ESP32
 
 #ifdef BATT_MONITOR
 
@@ -178,7 +167,5 @@ float battery_voltage(int pin)
 
 	return batt_voltage;
 }
-
-#endif
 
 #endif
