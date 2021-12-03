@@ -42,11 +42,26 @@
 	Graphviz viewr: http://www.webgraphviz.com/
 */
 
-#ifdef ESP321
+/*
 
-#error "TEST"
++------+----------+-----------+
+| Axis |   Sign   | Direction |
++------+----------+-----------+
+|    0 | Positive | CCW       |
+|    0 | Negative | CW        |
+|    1 | Positive | Forward   |
+|    1 | Negative | Backward  |
+|    2 | Positive | Backward  |
+|    2 | Negative | Forward   |
+|    3 | Positive | Down      |
+|    3 | Negative | Up        |
+|    4 | Positive | CW        |
+|    4 | Negative | CCW       |
+|    5 | Positive | Open      |
+|    5 | Negative | Close     |
++------+----------+-----------+
 
-#endif
+*/
 
 #pragma region Headers
 
