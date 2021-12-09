@@ -32,12 +32,6 @@
 
 //#define ENABLE_DEBUG_PORT
 
-/** @brief Safety switch pin definition. */
-#define PIN_SS 9
-
-/** @brief No Safety Switch - coment to enable. */
-#define NO_SAFETY_SWITCH
-
 /** @brief Additional time schedule divider. */
 #define TIME_SCALER 2
 
@@ -86,16 +80,16 @@
 #define PIN_DI3 5
 
 /** @brief Output data pin 0. */
-#define PIN_DO0 A6
+#define PIN_DO0 A3 // 17
 
 /** @brief Output data pin 1. */
-#define PIN_DO1 A7
+#define PIN_DO1 A2 // 16
 
 /** @brief Output data pin 2. */
-#define PIN_DO2 A2
+#define PIN_DO2 A7 // 21
 
 /** @brief Output data pin 3. */
-#define PIN_DO3 A3
+#define PIN_DO3 A6 // 20
 
 #pragma endregion
 

@@ -29,9 +29,7 @@
 #endif
 
 /** @brief Firmware version string. */
-#define ESP_FW_VERSION 1
-
-#define SERVICE_PORT 10182
+#define FW_VERSION 1
 
 #pragma region IO Pins Definitions
 
