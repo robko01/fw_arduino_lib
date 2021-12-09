@@ -184,6 +184,11 @@ class Robko01Class
 
 #pragma region Protected Methods
 
+    /** @brief Setup motors.
+     *  @return Void.
+     */
+    void setup_motors();
+
     /** @brief Update motor regulators.
      *  @param uint8_t address, Address of the axis.
      *  @return uint8_t, Motors states.
@@ -228,11 +233,6 @@ class Robko01Class
      *  @return Void.
      */
     void write_di(uint8_t data);
-
-    /** @brief Setup robot.
-     *  @return Void.
-     */
-    void setup_robot();
 
 #pragma endregion
 

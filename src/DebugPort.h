@@ -32,14 +32,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Definitions
 
-#define ENABLE_DEBUG_PORT
+// #define ENABLE_DEBUG_PORT
 
 #define SHOW_FUNC_NAMES
 
 #define DBG_OUTPUT_PORT_BAUDRATE 115200
 
 #define DBG_OUTPUT_PORT Serial
-
 
 #ifndef ENABLE_DEBUG_PORT
 #define DEBUGLOG(...)

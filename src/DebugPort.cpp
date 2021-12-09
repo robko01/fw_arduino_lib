@@ -32,7 +32,10 @@ void setup_debug_port()
 {
 	DBG_OUTPUT_PORT.begin(DBG_OUTPUT_PORT_BAUDRATE, SERIAL_8N1);
 	DBG_OUTPUT_PORT.print("\r\n\r\n\r\n");
+
+#ifdef ENABLE_DEBUG_PORT
 	DBG_OUTPUT_PORT.setDebugOutput(true);
+#endif
 
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");

@@ -1,5 +1,5 @@
 
-#include "robko01.h"
+#include "Robko01.h"
 
 /** 
  * @brief Generate IO Write signal.
@@ -78,6 +78,15 @@ uint8_t Robko01Class::read_do() {
 
 	static uint8_t StateL = 0;
 
+ 	// Serial.print(analogRead(m_BusConfig.DO0) > 512);
+ 	// Serial.print(',');
+ 	// Serial.print(analogRead(m_BusConfig.DO1) > 512);
+ 	// Serial.print(',');
+ 	// Serial.print(analogRead(m_BusConfig.DO2) > 512);
+ 	// Serial.print(',');
+ 	// Serial.print(analogRead(m_BusConfig.DO3) > 512);
+ 	// Serial.println();
+
 	bitWrite(StateL, 0, (analogRead(m_BusConfig.DO0) > 512));
 	bitWrite(StateL, 1, (analogRead(m_BusConfig.DO1) > 512));
 	bitWrite(StateL, 2, (analogRead(m_BusConfig.DO2) > 512));
@@ -126,6 +135,11 @@ void Robko01Class::setup_bus() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+    m_currentAddressIndex = 0;
+	m_portLoAIn = 0;
+	m_portHiAIn = 0;
+	m_portAOut = 0;
+
 	// Control bus.
 	pinMode(m_BusConfig.IOW, OUTPUT);
 	pinMode(m_BusConfig.IOR, OUTPUT);
@@ -141,10 +155,10 @@ void Robko01Class::setup_bus() {
 	pinMode(m_BusConfig.DI3, OUTPUT);
 
 	// Input data bus.
-	pinMode(m_BusConfig.DO0, INPUT_PULLUP);
-	pinMode(m_BusConfig.DO1, INPUT_PULLUP);
-	pinMode(m_BusConfig.DO2, INPUT_PULLUP);
-	pinMode(m_BusConfig.DO3, INPUT_PULLUP);
+	pinMode(m_BusConfig.DO0, INPUT);
+	pinMode(m_BusConfig.DO1, INPUT);
+	pinMode(m_BusConfig.DO2, INPUT);
+	pinMode(m_BusConfig.DO3, INPUT);
 
 	// Address bus.
 	pinMode(m_BusConfig.AO0, OUTPUT);
@@ -153,24 +167,18 @@ void Robko01Class::setup_bus() {
 }
 
 /** 
- * @brief Setup robot.
+ * @brief Setup motors.
  * 
  */
-void Robko01Class::setup_robot() {
+void Robko01Class::setup_motors() {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
+#endif // SHOW_FUNC_NAME
 
-	m_portLoAIn = 0;
-	m_portHiAIn = 0;
-	m_portAOut = 0;
+	m_motorsEnabled = false;
 	m_motorState = 0;
-	m_operationMode = OperationModes::NONE;
-
-	// Setup gpio bus signals.
-	setup_bus();
 
 	for (uint8_t address = 0; address < AXIS_COUNT; address++)
 	{
@@ -251,7 +259,11 @@ void Robko01Class::update_port_a(uint8_t address) {
 	}
 }
 
-
+/**
+ * @brief Init the robot.
+ * 
+ * @param config Robot GPIO configuration.
+ */
 void Robko01Class::init(BusConfig_t* config) {
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
@@ -261,15 +273,21 @@ void Robko01Class::init(BusConfig_t* config) {
 
     m_BusConfig = *config;
 	
-    m_currentAddressIndex = 0;
-
-	m_motorsEnabled = false;
-
 	m_updateRate = 1UL;
 
-    setup_robot();
+	m_operationMode = OperationModes::NONE;
+
+	// Setup gpio bus signals.
+	setup_bus();
+
+	// Setup motor regulators.
+    setup_motors();
 }
 
+/**
+ * @brief Update the robot.
+ * 
+ */
 void Robko01Class::update() {
 #ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
