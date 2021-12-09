@@ -30,17 +30,6 @@
 
 #pragma region Serial Port
 
-/** @brief Communication port. */
-#define COM_PORT Serial
-
-/** @brief Communication port speed. */
-#define COM_BAUDRATE 115200
-
-/** @brief Communication port time out response time. */
-#define COM_PORT_TIMEOUT 20
-
-#pragma endregion
-
 #pragma region IO Pins Definitions
 
 /** @brief Address pin 0. */

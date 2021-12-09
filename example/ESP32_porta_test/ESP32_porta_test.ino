@@ -91,7 +91,7 @@ unsigned long PreviousMillis_g = 0;
  * @brief Update interval.
  * 
  */
-const long UpdateInterval_g = 100;
+const long UpdateInterval_g = 500;
 
 /**
  * @brief Port A bits.
@@ -130,12 +130,10 @@ void setup()
         PIN_DO3,
 	};
 
+	setup_debug_port();
+
 	// Initialize the robot controller.
 	Robko01.init(&config);
-
-	// Initialize the communication port.
-	COM_PORT.begin(COM_BAUDRATE);
-	COM_PORT.setTimeout(COM_PORT_TIMEOUT);
 }
 
 /**
@@ -167,7 +165,14 @@ void display_port_a(uint8_t port_state)
 	for (int i = 7; i >= 0; i--)
 	{
 		TargetBit_g = bitRead(port_state, i);
-		Serial.print(TargetBit_g);
+        if (TargetBit_g)
+        {
+    		DEBUGLOG("1");
+        }
+        else
+        {
+    		DEBUGLOG("0");
+        }
 	}
-	Serial.println();
+	DEBUGLOG("\r\n");
 }

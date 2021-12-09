@@ -167,7 +167,7 @@ void display_port_a(uint8_t port_state)
 	for (int i = 7; i >= 0; i--)
 	{
 		TargetBit_g = bitRead(port_state, i);
-		Serial.print(TargetBit_g);
+		Serial.print(TargetBit_g ? '1' : '0');
 	}
 	Serial.println();
 }
