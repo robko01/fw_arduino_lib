@@ -28,8 +28,20 @@
 	#include "WProgram.h"
 #endif
 
-/** @brief Firmware version string. */
-#define FW_VERSION 1
+#define SERVICE_PORT 10182
+
+#pragma region Serial Port
+
+/** @brief Communication port. */
+#define COM_PORT Serial
+
+/** @brief Communication port speed. */
+#define COM_BAUDRATE 115200
+
+/** @brief Communication port time out response time. */
+#define COM_PORT_TIMEOUT 20
+
+#pragma endregion
 
 #pragma region IO Pins Definitions
 
