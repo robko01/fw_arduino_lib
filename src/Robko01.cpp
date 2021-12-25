@@ -107,6 +107,8 @@ void Robko01Class::write_di(uint8_t data) {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+	// Serial.println(data);
+
 	static uint8_t Di0StateL = 0;
 	static uint8_t Di1StateL = 0;
 	static uint8_t Di2StateL = 0;
@@ -117,10 +119,19 @@ void Robko01Class::write_di(uint8_t data) {
 	Di2StateL = bitRead(data, 2);
 	Di3StateL = bitRead(data, 3);
 
-	digitalWrite(m_BusConfig.DI0, Di0StateL);
-	digitalWrite(m_BusConfig.DI1, Di1StateL);
-	digitalWrite(m_BusConfig.DI2, Di2StateL);
-	digitalWrite(m_BusConfig.DI3, Di3StateL);
+ 	// Serial.print(Di0StateL);
+ 	// Serial.print(',');
+ 	// Serial.print(Di1StateL);
+ 	// Serial.print(',');
+ 	// Serial.print(Di2StateL);
+ 	// Serial.print(',');
+ 	// Serial.print(Di3StateL);
+ 	// Serial.println();
+
+	digitalWrite(m_BusConfig.DI0, Di0StateL == 1 ? HIGH : LOW);
+	digitalWrite(m_BusConfig.DI1, Di1StateL == 1 ? HIGH : LOW);
+	digitalWrite(m_BusConfig.DI2, Di2StateL == 1 ? HIGH : LOW);
+	digitalWrite(m_BusConfig.DI3, Di3StateL == 1 ? HIGH : LOW);
 }
 
 /** 
