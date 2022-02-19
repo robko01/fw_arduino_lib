@@ -54,6 +54,8 @@
 	#include "WProgram.h"
 #endif
 
+// #define SLOW
+
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
 #endif
 

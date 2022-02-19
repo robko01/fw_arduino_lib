@@ -12,11 +12,17 @@ void Robko01Class::iow() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
+#if defined(SLOW)
+	delay(1);
+#else
 	delayMicroseconds(100);
-	// delay(1);
+#endif
 	digitalWrite(m_BusConfig.IOW, LOW);
+#if defined(SLOW)
+	delay(1);
+#else
 	delayMicroseconds(100);
-	// delay(1);
+#endif
 	digitalWrite(m_BusConfig.IOW, HIGH);
 }
 
@@ -31,11 +37,17 @@ void Robko01Class::ior() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-	// delay(1);
+#if defined(SLOW)
+	delay(10);
+#else
 	delayMicroseconds(100);
+#endif
 	digitalWrite(m_BusConfig.IOR, LOW);
+#if defined(SLOW)
+	delay(10);
+#else
 	delayMicroseconds(100);
-	// delay(1);
+#endif
 	digitalWrite(m_BusConfig.IOR, HIGH);
 }
 
@@ -284,7 +296,11 @@ void Robko01Class::init(BusConfig_t* config) {
 
     m_BusConfig = *config;
 	
+#if defined(SLOW)
+	m_updateRate = 100UL;
+#else
 	m_updateRate = 1UL;
+#endif
 
 	m_operationMode = OperationModes::NONE;
 
@@ -315,7 +331,7 @@ void Robko01Class::update() {
 		if (m_currentAddressIndex < AXIS_COUNT)
 		{
 			// Update motor state.
-			// m_steppers[m_currentAddressIndex].disableOutputs();
+			m_steppers[m_currentAddressIndex].disableOutputs();
 			m_steppers[m_currentAddressIndex].enableOutputs();
 			set_address_bus(m_currentAddressIndex);
 			m_motorState = update_motor(m_currentAddressIndex);
