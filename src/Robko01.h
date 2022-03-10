@@ -38,11 +38,23 @@
  */
 #define ADDRESS_COUNT 8
 
+#define DEFAULT_SPEED 5000.0f
+
 /**
  * @brief Default acceleration.
  * 
  */
-#define DEFAULT_ACCELERATION 700.0f //250
+#define DEFAULT_ACCELERATION 700.0f //700, 250
+
+/**
+ * @brief Maximum stapes per second for one motor.
+ * 
+ */
+#define MAX_SPEED_OFFSET 0
+
+#define IOR_PULSE_TIME 100
+
+#define IOW_PULSE_TIME 100
 
 #pragma endregion
 
@@ -67,12 +79,6 @@
 
 /* Stepper motor controller. */
 #include <AccelStepper.h>
-
-/**
- * @brief Maximum stapes per second for one motor.
- * 
- */
-#define MAX_SPEED_OFFSET 0
 
 #pragma endregion
 

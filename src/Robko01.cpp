@@ -12,16 +12,17 @@ void Robko01Class::iow() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#if defined(SLOW)
-	delay(1);
-#else
-	delayMicroseconds(100);
-#endif
+// #if defined(SLOW)
+// 	delay(1);
+// #else
+// 	delayMicroseconds(IOW_PULSE_TIME);
+// #endif
+
 	digitalWrite(m_BusConfig.IOW, LOW);
 #if defined(SLOW)
 	delay(1);
 #else
-	delayMicroseconds(100);
+	delayMicroseconds(IOW_PULSE_TIME);
 #endif
 	digitalWrite(m_BusConfig.IOW, HIGH);
 }
@@ -37,16 +38,17 @@ void Robko01Class::ior() {
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 
-#if defined(SLOW)
-	delay(10);
-#else
-	delayMicroseconds(100);
-#endif
+// #if defined(SLOW)
+// 	delay(10);
+// #else
+// 	delayMicroseconds(IOR_PULSE_TIME);
+// #endif
+
 	digitalWrite(m_BusConfig.IOR, LOW);
 #if defined(SLOW)
 	delay(10);
 #else
-	delayMicroseconds(100);
+	delayMicroseconds(IOR_PULSE_TIME);
 #endif
 	digitalWrite(m_BusConfig.IOR, HIGH);
 }
@@ -206,7 +208,7 @@ void Robko01Class::setup_motors() {
 	for (uint8_t address = 0; address < AXIS_COUNT; address++)
 	{
 		m_steppers[address] = AccelStepper(AccelStepper::FULL4WIRE, m_BusConfig.DI0, m_BusConfig.DI1, m_BusConfig.DI2, m_BusConfig.DI3); // HALF4WIRE, FULL4WIRE
-		//m_steppers[address].setMaxSpeed(DEFAULT_SPEED);
+		m_steppers[address].setMaxSpeed(DEFAULT_SPEED);
 		m_steppers[address].setAcceleration(DEFAULT_ACCELERATION);
 		m_steppers[address].setCurrentPosition(0);
 		m_steppers[address].stop();
@@ -297,9 +299,9 @@ void Robko01Class::init(BusConfig_t* config) {
     m_BusConfig = *config;
 	
 #if defined(SLOW)
-	m_updateRate = 100UL;
+	m_updateRate = 1000000UL;
 #else
-	m_updateRate = 1UL;
+	m_updateRate = 1000UL;
 #endif
 
 	m_operationMode = OperationModes::NONE;
@@ -323,8 +325,9 @@ void Robko01Class::update() {
 #endif // SHOW_FUNC_NAMES
 
 	// Update time.
-	m_timeNow = millis();
+	m_timeNow = micros(); // millis();
 
+	// if (true) 
 	if ((m_timeNow - m_timePrev) >= m_updateRate)
 	{
 		// Update motors.		
@@ -476,22 +479,22 @@ void Robko01Class::move_relative(JointPosition_t position) {
 
 	m_steppers[AddressIndex::Base].move(position.BasePos);
 	m_steppers[AddressIndex::Base].setSpeed(position.BaseSpeed);
-	m_steppers[AddressIndex::Base].setMaxSpeed(position.BaseSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::Base].setMaxSpeed(position.BaseSpeed + MAX_SPEED_OFFSET);
 	m_steppers[AddressIndex::Shoulder].move(position.ShoulderPos);
 	m_steppers[AddressIndex::Shoulder].setSpeed(position.ShoulderSpeed);
-	m_steppers[AddressIndex::Shoulder].setMaxSpeed(position.ShoulderSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::Shoulder].setMaxSpeed(position.ShoulderSpeed + MAX_SPEED_OFFSET);
 	m_steppers[AddressIndex::Elbow].move(position.ElbowPos);
 	m_steppers[AddressIndex::Elbow].setSpeed(position.ElbowSpeed);
-	m_steppers[AddressIndex::Elbow].setMaxSpeed(position.ElbowSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::Elbow].setMaxSpeed(position.ElbowSpeed + MAX_SPEED_OFFSET);
 	m_steppers[AddressIndex::DiffLeft].move(position.LeftDiffPos);
 	m_steppers[AddressIndex::DiffLeft].setSpeed(position.LeftDiffSpeed);
-	m_steppers[AddressIndex::DiffLeft].setMaxSpeed(position.LeftDiffSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::DiffLeft].setMaxSpeed(position.LeftDiffSpeed + MAX_SPEED_OFFSET);
 	m_steppers[AddressIndex::DiffRight].move(position.RightDiffPos);
 	m_steppers[AddressIndex::DiffRight].setSpeed(position.RightDiffSpeed);
-	m_steppers[AddressIndex::DiffRight].setMaxSpeed(position.RightDiffSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::DiffRight].setMaxSpeed(position.RightDiffSpeed + MAX_SPEED_OFFSET);
 	m_steppers[AddressIndex::Gripper].move(position.GripperPos);
 	m_steppers[AddressIndex::Gripper].setSpeed(position.GripperSpeed);
-	m_steppers[AddressIndex::Gripper].setMaxSpeed(position.GripperSpeed + MAX_SPEED_OFFSET);
+	// m_steppers[AddressIndex::Gripper].setMaxSpeed(position.GripperSpeed + MAX_SPEED_OFFSET);
 }
 
 /** 
