@@ -321,7 +321,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
 		Robko01.set_port_a(payload[0]);
 
 		// Respond with success.
-		SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
+		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, 1);
 	}
 	else if (opcode == OpCodes::DI)
 	{

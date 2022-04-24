@@ -142,10 +142,33 @@ void Robko01Class::write_di(uint8_t data) {
  	// Serial.print(Di3StateL);
  	// Serial.println();
 
-	digitalWrite(m_BusConfig.DI0, Di0StateL == 1 ? HIGH : LOW);
-	digitalWrite(m_BusConfig.DI1, Di1StateL == 1 ? HIGH : LOW);
-	digitalWrite(m_BusConfig.DI2, Di2StateL == 1 ? HIGH : LOW);
-	digitalWrite(m_BusConfig.DI3, Di3StateL == 1 ? HIGH : LOW);
+	pinMode(m_BusConfig.DI0, OUTPUT);
+	pinMode(m_BusConfig.DI1, OUTPUT);
+	pinMode(m_BusConfig.DI2, OUTPUT);
+	pinMode(m_BusConfig.DI3, OUTPUT);
+
+	digitalWrite(m_BusConfig.DI0, Di0StateL == 1 ? LOW : HIGH);
+	digitalWrite(m_BusConfig.DI1, Di1StateL == 1 ? LOW : HIGH);
+	digitalWrite(m_BusConfig.DI2, Di2StateL == 1 ? LOW : HIGH);
+	digitalWrite(m_BusConfig.DI3, Di3StateL == 1 ? LOW : HIGH);
+
+	// Test 1
+	// if (m_test_bit == 0)
+	// {
+	// 	m_test_bit = 1;
+	// 	digitalWrite(m_BusConfig.DI0, HIGH);
+	// }
+	// else
+	// {
+	// 	m_test_bit = 0;
+	// 	digitalWrite(m_BusConfig.DI0, LOW);
+	// }
+
+	// Test 2
+	// digitalWrite(m_BusConfig.DI0, HIGH);
+	// digitalWrite(m_BusConfig.DI1, HIGH);
+	// digitalWrite(m_BusConfig.DI2, HIGH);
+	// digitalWrite(m_BusConfig.DI3, HIGH);
 }
 
 /** 
