@@ -30,6 +30,8 @@
 
 #define SERVICE_PORT 10182
 
+#define ESP_FW_VERSION 1
+
 #pragma region IO Pins Definitions
 
 /** @brief Address pin 0. */
@@ -45,7 +47,7 @@
 #define PIN_IOW 32
 
 /** @brief Control pin IO read.*/
-#define PIN_IOR 23
+#define PIN_IOR 15
 
 /** @brief Input data pin 0. */
 #define PIN_DI0 13
