@@ -103,6 +103,24 @@ bool StorePosition_g;
 int SafetyStopFlag_g;
 
 /**
+ * @brief Move joint in absolute mode.
+ * 
+ */
+JointPositionUnion MoveAbsolute_g;
+
+/**
+ * @brief Move joint in relative mode.
+ * 
+ */
+JointPositionUnion MoveRelative_g;
+
+/**
+ * @brief Move joint in speed mode.
+ * 
+ */
+JointPositionUnion MoveSpeed_g;
+
+/**
  * @brief Curent joint positions.
  * 
  */
@@ -138,6 +156,10 @@ const char* PASS_g = "yourpasswd";
 
 #endif
 
+/**
+ * @brief TCP server for robot operation service.
+ * 
+ */
 WiFiServer TCPServer_g(SERVICE_PORT);
 
 #pragma endregion
@@ -304,6 +326,12 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 
 	if (opcode == OpCodes::Ping)
 	{
+#ifdef SHOW_FUNC_NAMES
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+		DEBUGLOG("Ping...\r\n");
+#endif // SHOW_FUNC_NAMES
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
 	}
 	else if (opcode == OpCodes::Stop)
@@ -347,15 +375,14 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 		}
 
 		// TODO: Move to function.
-		JointPositionUnion Motion;
 		size_t DataLengthL = sizeof(JointPosition_t);
 		for (uint8_t index = 0; index < DataLengthL; index++)
 		{
-			Motion.Buffer[index] = payload[index];
+			MoveRelative_g.Buffer[index] = payload[index];
 		}
 
 		// Set motion data.
-		Robko01.move_relative(Motion.Value);
+		Robko01.move_relative(MoveRelative_g.Value);
 		// Respond with success.
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
 	}
@@ -383,15 +410,14 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 		}
 
 		// Extract motion data.
-		JointPositionUnion Motion;
 		size_t DataLengthL = sizeof(JointPosition_t);
 		for (uint8_t index = 0; index < DataLengthL; index++)
 		{
-			Motion.Buffer[index] = payload[index];
+			MoveAbsolute_g.Buffer[index] = payload[index];
 		}
 
 		// Set motion data.
-		Robko01.move_absolute(Motion.Value);
+		Robko01.move_absolute(MoveAbsolute_g.Value);
 
 		// Respond with success.
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
@@ -414,6 +440,12 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 	}
 	else if (opcode == OpCodes::IsMoving)
 	{
+#ifdef SHOW_FUNC_NAMES_S
+		DEBUGLOG("\r\n");
+		DEBUGLOG(__PRETTY_FUNCTION__);
+		DEBUGLOG("\r\n");
+		DEBUGLOG("IsMoveing...\r\n");
+#endif // SHOW_FUNC_NAMES
 		uint8_t m_payloadResponse[1];
 		m_payloadResponse[0] = MotorState_g;
 
@@ -436,14 +468,14 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 			return;
 		}
 		
-		JointPositionUnion Motion;
+
 		for (uint8_t index = 0; index < size; index++)
 		{
-			Motion.Buffer[index] = payload[index];
+			MoveSpeed_g.Buffer[index] = payload[index];
 		}
 		
 		// Set motion data.
-		Robko01.move_speed(Motion.Value);
+		Robko01.move_speed(MoveSpeed_g.Value);
 		
 		// Respond with success.
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
@@ -468,6 +500,30 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload) {
 		
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
 	}
+}
+
+/** @brief Printout in the debug console flash state.
+ *  @return Void.
+ */
+void show_device_properties() {
+#ifdef SHOW_FUNC_NAMES
+	DEBUGLOG("\r\n");
+	DEBUGLOG(__PRETTY_FUNCTION__);
+	DEBUGLOG("\r\n");
+#endif // SHOW_FUNC_NAMES
+
+#if defined(ESP8266)
+// ESP8266
+	DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
+#endif
+
+	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
+	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
+	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
+	DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
+	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
+	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
+	DEBUGLOG("\r\n");
 }
 
 #pragma endregion
