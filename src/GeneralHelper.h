@@ -98,11 +98,6 @@ int to_minutes(int minutes);
  */
 int to_hours(int minutes);
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
- */
-void show_device_properties();
-
 #ifdef BATT_MONITOR
 
 /** @brief Read battery voltage.
@@ -113,6 +108,13 @@ float battery_voltage(int pin);
 #endif
 
 #pragma endregion
+
+/**
+ * @brief Generate cookie string.
+ * 
+ * @return String cookie string.
+ */
+String generate_random_str(uint8_t size = 20);
 
 #endif
 

@@ -603,7 +603,7 @@ void SUPERClass::init(Stream &port) {
 	DEBUGLOG("\r\n");
 #endif
 
-#ifdef ESP32
+#ifdef ARDUINO_ARCH_ESP32
 
 	if (&port == m_port)
 	{

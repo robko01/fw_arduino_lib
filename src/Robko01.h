@@ -56,6 +56,10 @@
 
 #define IOW_PULSE_TIME 100
 
+#ifndef ADC_DI_TRESHOLD
+#define ADC_DI_TRESHOLD 384
+#endif
+
 #pragma endregion
 
 #pragma region Headres

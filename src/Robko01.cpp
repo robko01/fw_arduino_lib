@@ -92,19 +92,19 @@ uint8_t Robko01Class::read_do() {
 
 	static uint8_t StateL = 0;
 
- 	// Serial.print(analogRead(m_BusConfig.DO0) > 512);
+ 	// Serial.print(analogRead(m_BusConfig.DO0) > ADC_DI_TRESHOLD);
  	// Serial.print(',');
- 	// Serial.print(analogRead(m_BusConfig.DO1) > 512);
+ 	// Serial.print(analogRead(m_BusConfig.DO1) > ADC_DI_TRESHOLD);
  	// Serial.print(',');
- 	// Serial.print(analogRead(m_BusConfig.DO2) > 512);
+ 	// Serial.print(analogRead(m_BusConfig.DO2) > ADC_DI_TRESHOLD);
  	// Serial.print(',');
- 	// Serial.print(analogRead(m_BusConfig.DO3) > 512);
+ 	// Serial.print(analogRead(m_BusConfig.DO3) > ADC_DI_TRESHOLD);
  	// Serial.println();
 
-	bitWrite(StateL, 0, (analogRead(m_BusConfig.DO0) > 512));
-	bitWrite(StateL, 1, (analogRead(m_BusConfig.DO1) > 512));
-	bitWrite(StateL, 2, (analogRead(m_BusConfig.DO2) > 512));
-	bitWrite(StateL, 3, (analogRead(m_BusConfig.DO3) > 512));
+	bitWrite(StateL, 0, (analogRead(m_BusConfig.DO0) > ADC_DI_TRESHOLD));
+	bitWrite(StateL, 1, (analogRead(m_BusConfig.DO1) > ADC_DI_TRESHOLD));
+	bitWrite(StateL, 2, (analogRead(m_BusConfig.DO2) > ADC_DI_TRESHOLD));
+	bitWrite(StateL, 3, (analogRead(m_BusConfig.DO3) > ADC_DI_TRESHOLD));
 
 	return StateL;
 }
@@ -392,7 +392,7 @@ void Robko01Class::update() {
  * @return false 
  */
 bool Robko01Class::motors_enabled() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -492,7 +492,7 @@ void Robko01Class::clear_motors() {
  * @param position JointPosition_t, robot position.
  */
 void Robko01Class::move_relative(JointPosition_t position) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -526,7 +526,7 @@ void Robko01Class::move_relative(JointPosition_t position) {
  * @param position JointPosition_t, robot position.
  */
 void Robko01Class::move_absolute(JointPosition_t position) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -560,7 +560,7 @@ void Robko01Class::move_absolute(JointPosition_t position) {
  * @param position JointPosition_t, robot position.
  */
 void Robko01Class::move_speed(JointPosition_t position) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -568,13 +568,12 @@ void Robko01Class::move_speed(JointPosition_t position) {
 
 	m_operationMode = OperationModes::Speed;
 
-	float BasePos = (float)position.BaseSpeed;
-	m_steppers[AddressIndex::Base].setSpeed(BasePos);
-	m_steppers[AddressIndex::Shoulder].setSpeed((float)position.ShoulderSpeed);
-	m_steppers[AddressIndex::Elbow].setSpeed((float)position.ElbowSpeed);
-	m_steppers[AddressIndex::DiffLeft].setSpeed((float)position.LeftDiffSpeed);
-	m_steppers[AddressIndex::DiffRight].setSpeed((float)position.RightDiffSpeed);
-	m_steppers[AddressIndex::Gripper].setSpeed((float)position.GripperSpeed);
+	m_steppers[AddressIndex::Base].setSpeed(position.BaseSpeed);
+	m_steppers[AddressIndex::Shoulder].setSpeed(position.ShoulderSpeed);
+	m_steppers[AddressIndex::Elbow].setSpeed(position.ElbowSpeed);
+	m_steppers[AddressIndex::DiffLeft].setSpeed(position.LeftDiffSpeed);
+	m_steppers[AddressIndex::DiffRight].setSpeed(position.RightDiffSpeed);
+	m_steppers[AddressIndex::Gripper].setSpeed(position.GripperSpeed);
 }
 
 /** 
@@ -583,7 +582,7 @@ void Robko01Class::move_speed(JointPosition_t position) {
  * @return JointPosition_t, current robot position.
  */
 JointPosition_t Robko01Class::get_position() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -613,7 +612,7 @@ JointPosition_t Robko01Class::get_position() {
  * @param uint8_t value, Value of the port.
  */
 void Robko01Class::set_port_a(uint8_t value) {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");
@@ -628,7 +627,7 @@ void Robko01Class::set_port_a(uint8_t value) {
  * @return uint8_t, Port A input state.
  */
 uint8_t Robko01Class::get_port_a() {
-#ifdef SHOW_FUNC_NAMES
+#ifdef SHOW_FUNC_NAMES_S
 	DEBUGLOG("\r\n");
 	DEBUGLOG(__PRETTY_FUNCTION__);
 	DEBUGLOG("\r\n");

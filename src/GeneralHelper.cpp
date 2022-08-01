@@ -135,25 +135,6 @@ int to_hours(int minutes)
 	return minutes / 60;
 }
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
- */
-void show_device_properties() {
-#ifdef SHOW_FUNC_NAMES
-	DEBUGLOG("\r\n");
-	DEBUGLOG(__PRETTY_FUNCTION__);
-	DEBUGLOG("\r\n");
-#endif // SHOW_FUNC_NAMES
-
-	DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-	DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-	DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-	//DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-	DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-	DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-	DEBUGLOG("\r\n");
-}
-
 #ifdef BATT_MONITOR
 
 /** @brief Read battery voltage.
@@ -169,3 +150,22 @@ float battery_voltage(int pin)
 }
 
 #endif
+
+/**
+ * @brief Generate cookie string.
+ * 
+ * @return String cookie string.
+ */
+String generate_random_str(uint8_t size)
+{
+  static uint8_t chars[30];
+
+  for (uint8_t index = 0; index < size; index++)
+  {
+    chars[index] = (uint8_t)random(48,122);
+  }
+  chars[size] = (uint8_t)0;
+
+  return String(*chars);
+}
+
