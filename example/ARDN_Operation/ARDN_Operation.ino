@@ -81,9 +81,11 @@
 
 #include "OperationsCodes.h"
 
-#pragma endregion
+#ifdef ENABLE_SPI_IO
 
-#pragma region Prototypes
+#include<SPI.h>
+
+#endif#pragma region Prototypes
 
 /**
  * @brief Callback handler function.
@@ -180,7 +182,17 @@ void setup()
 }
 
 /**
- * @brief Main loop of the program.
+ * @brief Main lo
+
+#ifdef ENABLE_SPI_IO
+
+  SPI.begin();                            //Begins the SPI commnuication
+
+  SPI.setClockDivider(SPI_CLOCK_DIV8);    //Sets clock for SPI communication at 8 (16/8=2Mhz)
+
+  digitalWrite(SS, HIGH);                  // Setting SlaveSelect as HIGH (So master doesnt connnect with slave)
+
+#endifop of the program.
  * 
  */
 void loop()
@@ -320,7 +332,17 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload)
 		// Set port A.
 		Robko01.set_port_a(payload[0]);
 
-		// Respond with success.
+		
+
+#ifdef ENABLE_SPI_IO
+    static byte MasterSendL, MasterReceiveL;
+
+    MasterSendL = payload[0];
+
+    // Send the mastersend value to slave also receives value from slave.
+    MasterReceiveL = SPI.transfer(MasterSendL);
+#endif
+// Respond with success.
 		SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, 1);
 	}
 	else if (opcode == OpCodes::DI)
