@@ -50,7 +50,7 @@
 
 #pragma endregion
 
-#pragma region Robot Port B pinmap
+#pragma region Robot Port B pin map
  
 /** @brief Address pin 0. */
 #define PIN_AO0 6
@@ -90,6 +90,16 @@
 
 /** @brief Output data pin 3. */
 #define PIN_DO3 A6 // 20
+
+#pragma endregion
+
+#pragma region SPI IO
+
+#define ENABLE_SPI_IO
+
+#ifdef ENABLE_SPI_IO
+
+#endif
 
 #pragma endregion
 
