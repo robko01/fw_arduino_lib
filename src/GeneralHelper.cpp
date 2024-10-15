@@ -38,6 +38,7 @@ uint8_t bit_array_to_uint8(bool arr[], uint8_t count)
 	return ResultL;
 }
 
+
 /** @brief Get MAC address.
  *  @return String, Returns the string of MAC address.
  */

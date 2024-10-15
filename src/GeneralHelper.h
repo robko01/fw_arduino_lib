@@ -28,7 +28,10 @@
 	#include "WProgram.h"
 #endif
 
+
+#if defined(ESP32)
 #include <WiFi.h>
+#endif
 
 #include "DebugPort.h"
 
