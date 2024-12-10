@@ -210,6 +210,36 @@ void SUPERClass::clear_frame(uint8_t * frame, uint8_t length)
 	}
 }
 
+/** @brief Parse and execute the incoming commands.
+ *  @param frame, uint8_t *, The frame array.
+ *  @param length, uint8_t, The frame array length.
+ *  @return Void.
+ */
+void SUPERClass::parse_frame(uint8_t * frame, uint8_t length)
+{
+	if (frame[FrameIndexes::FrmType] == Request)
+	{
+		if (cbRequest != nullptr)
+		{
+			get_payload(frame, length, m_payloadRequest);
+
+			// cbRequest(frame[FrameIndexes::OperationCode], length, m_payloadRequest);
+			cbRequest(frame[FrameIndexes::OperationCode], frame[FrameIndexes::Length], m_payloadRequest);
+		}
+	}
+	else if (frame[FrameIndexes::FrmType] == FrameType::Response)
+	{
+		/*
+		if (frame[FrameIndexes::OperationCode] == OpCodes::Ping)
+		{
+		}
+		else if (frame[FrameIndexes::OperationCode] == OpCodes::Stop)
+		{
+		}
+		*/
+	}
+}
+
 /** @brief Read incoming commands.
  *  @return Void.
  */
@@ -222,14 +252,14 @@ void SUPERClass::read_frame() {
 
 	static uint8_t TemporalDataLengthL = 0;
 	static uint8_t CommStateL = fsSentinel;
-
+	static uint8_t InByteL = 0;
 
 	if (m_port->available() < 1)
 	{
 		return;
 	}
 
-	byte InByteL = 0;
+	InByteL = 0;
 	while (m_port->available() > 0)
 	{
 		InByteL = m_port->read();
@@ -323,13 +353,11 @@ void SUPERClass::read_frame() {
 			*m_ptrFrameBuffer++ = InByteL;
 			if (--TemporalDataLengthL == 0)
 			{
+#ifdef SHOW_STATES
 				for (uint8_t index = 0; index < m_frameBuffer[FrameIndexes::Length] + 5; index++)
 				{
-#ifdef SHOW_STATES
 					DEBUGLOG("%02X ", m_frameBuffer[index]);
-#endif
 				}
-#ifdef SHOW_STATES
 				DEBUGLOG("\r\n");
 #endif
 
@@ -351,233 +379,6 @@ void SUPERClass::read_frame() {
 		default:
 			break;
 		}
-	}
-}
-
-/** @brief Parse and execute the incoming commands.
- *  @param frame, uint8_t *, The frame array.
- *  @param length, uint8_t, The frame array length.
- *  @return Void.
- */
-void SUPERClass::parse_frame(uint8_t * frame, uint8_t length)
-{
-	if (frame[FrameIndexes::FrmType] == Request)
-	{
-		if (cbRequest != nullptr)
-		{
-			get_payload(frame, length, m_payloadRequest);
-
-			// cbRequest(frame[FrameIndexes::OperationCode], length, m_payloadRequest);
-			cbRequest(frame[FrameIndexes::OperationCode], frame[FrameIndexes::Length], m_payloadRequest);
-		}
-
-		/*
-		if (frame[FrameIndexes::OperationCode] == OpCodes::Ping)
-		{
-			send_raw_response(OpCodes::Ping, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::Stop)
-		{
-			// TODO: Create callback.
-			//Robko01.stop_motors();
-
-			send_raw_response(OpCodes::Stop, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::Disable)
-		{
-			// TODO: Create callback.
-			//Robko01.disable_motors();
-			// TODO: Move it to callback.
-			//MotorsEnabled_g = false;
-
-			send_raw_response(OpCodes::Disable, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::Enable)
-		{
-			// TODO: Create callback.
-			//Robko01.enable_motors();
-			// TODO: Move it to callback.
-			//MotorsEnabled_g = true;
-
-			send_raw_response(OpCodes::Enable, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::Clear)
-		{
-			// TODO: Create callback.
-			//Robko01.clear_motors();
-
-			send_raw_response(OpCodes::Clear, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveRelative)
-		{
-			// If it is not enabled, do not execute.
-			if (MotorsEnabled_g == false)
-			{
-				send_raw_response(OpCodes::MoveRelative, StatusCodes::Error, NULL, 0);
-				return;
-			}
-
-			// If it is move, do not execute the command.
-			if (MotorState_g != 0)
-			{
-				m_payloadResponse[0] = MotorState_g;
-				send_raw_response(OpCodes::MoveRelative, StatusCodes::Busy, m_payloadResponse, 1);
-				return;
-			}
-
-			// Extract motion data.
-			get_payload(frame, length, m_payloadRequest);
-
-			// TODO: Move to function.
-			JointPositionUnion Motion;
-			size_t DataLengthL = sizeof(JointPosition_t);
-			for (uint8_t index = 0; index < DataLengthL; index++)
-			{
-				Motion.Buffer[index] = m_payloadRequest[index];
-			}
-
-			// TODO: Create callback.
-			// Set motion data.
-			//Robko01.move_relative(Motion.Value);
-
-			// Respond with success.
-			send_raw_response(OpCodes::MoveRelative, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveAbsolute)
-		{
-			// If it is not enabled, do not execute.
-			if (MotorsEnabled_g == false)
-			{
-				// Respond with error.
-				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Error, NULL, 0);
-
-				// Exit
-				return;
-			}
-
-			// If it is move, do not execute the command.
-			if (MotorState_g != 0)
-			{
-				m_payloadResponse[0] = MotorState_g;
-
-				// Respond with busy.
-				send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Busy, m_payloadResponse, 1);
-				
-				// Exit
-				return;
-			}
-
-			// Extract motion data.
-			// TODO: Move to function.
-			get_payload(frame, length, m_payloadRequest);
-			JointPositionUnion Motion;
-			size_t DataLengthL = sizeof(JointPosition_t);
-			for (uint8_t index = 0; index < DataLengthL; index++)
-			{
-				Motion.Buffer[index] = m_payloadRequest[index];
-			}
-
-			// Set motion data.
-			Robko01.move_absolute(Motion.Value);
-
-			// Respond with success.
-			send_raw_response(OpCodes::MoveAbsolute, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::DO)
-		{
-			// Extract port A data.
-			get_payload(frame, length, m_payloadRequest);
-
-			// Set port A.
-			Robko01.set_port_a(m_payloadRequest[0]);
-
-			// Respond with success.
-			send_raw_response(OpCodes::DO, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::DI)
-		{
-			m_payloadResponse[0] = Robko01.get_port_a();
-			DEBUGLOG("Payload: ");
-			DEBUGLOG(m_payloadResponse[0]);
-			DEBUGLOG("\r\n");
-
-			send_raw_response(OpCodes::DI, StatusCodes::Ok, m_payloadResponse, 1);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::IsMoving)
-		{
-			m_payloadResponse[0] = MotorState_g;
-
-			send_raw_response(OpCodes::IsMoving, StatusCodes::Ok, m_payloadResponse, 1);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::CurrentPosition)
-		{
-			CurrentPositions_g.Value = Robko01.get_position();
-
-			send_raw_response(OpCodes::CurrentPosition, StatusCodes::Ok, CurrentPositions_g.Buffer, sizeof(JointPosition_t));
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::MoveSpeed)
-		{
-			// If it is not enabled, do not execute.
-			if (MotorsEnabled_g == false)
-			{
-				send_raw_response(OpCodes::MoveSpeed, StatusCodes::Error, NULL, 0);
-				return;
-			}
-			
-			// Extract motion data.
-			get_payload(frame, length, m_payloadRequest);
-			
-			// TODO: Move to function.
-			JointPositionUnion Motion;
-			uint8_t DataLengthL = frame[FrameIndexes::Length];
-			for (uint8_t index = 0; index < DataLengthL; index++)
-			{
-				Motion.Buffer[index] = m_payloadRequest[index];
-			}
-			
-			// Set motion data.
-			Robko01.move_speed(Motion.Value);
-			
-			// Respond with success.
-			send_raw_response(OpCodes::MoveSpeed, StatusCodes::Ok, NULL, 0);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::SetRobotID)
-		{
-			get_payload(frame, length, m_payloadRequest);
-
-			// TODO: Write to I2C EEPROM.
-			//for (uint8_t index = 0; index < DataLengthL; index++)
-			//{
-			//	Motion.Buffer[index] = m_payloadRequest[index];
-			//}
-			
-
-			send_raw_response(OpCodes::SetRobotID, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::GetRobotID)
-		{
-
-		// TODO: Read from I2C EEPROM.
-		//for (uint8_t index = 0; index < DataLengthL; index++)
-		//{
-		//	m_payloadRequest[index] = Motion.Buffer[index];
-		//}
-		
-
-		send_raw_response(OpCodes::GetRobotID, StatusCodes::Ok, m_payloadRequest, frame[FrameIndexes::Length] - 1);
-		}
-		*/
-	}
-	else if (frame[FrameIndexes::FrmType] == FrameType::Response)
-	{
-		/*
-		if (frame[FrameIndexes::OperationCode] == OpCodes::Ping)
-		{
-		}
-		else if (frame[FrameIndexes::OperationCode] == OpCodes::Stop)
-		{
-		}
-		*/
 	}
 }
 
