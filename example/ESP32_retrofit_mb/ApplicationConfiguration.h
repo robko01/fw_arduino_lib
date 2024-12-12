@@ -1,5 +1,5 @@
 /*
-	Copyright (c) [2019] [Orlin Dimitrov]
+	Copyright (c) [2024] [Orlin Dimitrov]
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -28,11 +28,22 @@
 	#include "WProgram.h"
 #endif
 
-#define SERVICE_PORT 10182
-
 #define ESP_FW_VERSION 1
 
+#pragma region Options
+
+#define ENABLE_MOTORS_IO
+
+#define ENABLE_MOTORS
+
+#define ENABLE_SUPER
+
+#define ENABLE_OTA
+
+#pragma endregion // Options
+
 #pragma region IO Pins Definitions
+#if defined(ENABLE_MOTORS_IO)
 
 /**
  * @brief Motors enables pin.
@@ -138,7 +149,7 @@
  * 
  */
 #define M6_LIMIT 35
-
+#endif // defined(ENABLE_MOTORS_IO)
 #pragma endregion
 
 #pragma region Motors Params
@@ -158,5 +169,11 @@
 #define MAX_SPEED_OFFSET 0
 
 #pragma endregion // Params
+
+#pragma region Networ Configuration
+
+#define SERVICE_PORT 10182
+
+#pragma endregion // Networ Configuration
 
 #endif

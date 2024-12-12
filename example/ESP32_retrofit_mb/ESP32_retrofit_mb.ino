@@ -1,7 +1,7 @@
 /*
     MIT License
     
-    Copyright (c) [2019] [Orlin Dimitrov]
+    Copyright (c) [2024] [Orlin Dimitrov]
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
     SOFTWARE.
 */
 
-/*
+/**
 
 +------+----------+-----------+
 | Axis |   Sign   | Direction |
@@ -45,27 +45,35 @@
 
 #pragma region Headers
 
-#include <WiFi.h>
-
 #include "ApplicationConfiguration.h"
-
-#include "JointPosition.h"
-
-#include "JointPositionUnion.h"
-
-#include "SUPER.h"
 
 #include "DebugPort.h"
 
-#include "OperationsCodes.h"
-
-#include "DefaultCredentials.h"
-
 #include "GeneralHelper.h"
 
-/* Stepper motor controller. */
+#if defined(ENABLE_MOTORS)
 #include <AccelStepper.h>
 #include <MultiStepper.h>
+#endif // define(ENABLE_MOTORS)
+
+#if defined(ENABLE_SUPER)
+#include "SUPER.h"
+#include "OperationsCodes.h"
+#endif // define(ENABLE_SUPER)
+
+#if defined(ENABLE_MOTORS) || defined(ENABLE_SUPER)
+#include "JointPosition.h"
+#include "JointPositionUnion.h"
+#endif // define(ENABLE_MOTORS) || defined(ENABLE_SUPER)
+
+#if defined(ENABLE_SUPER) || defined(ENABLE_OTA)
+#include <WiFi.h>
+#include "DefaultCredentials.h"
+#endif defined(ENABLE_SUPER) || defined(ENABLE_OTA)
+
+#if defined(ENABLE_OTA)
+#include <ArduinoOTA.h>
+#endif // define(ENABLE_OTA)
 
 #pragma endregion // Headers
 
@@ -81,12 +89,20 @@ enum OperationModes : uint8_t {
 
 #pragma region Prototypes
 
+/** @brief Printout in the debug console flash state.
+ *  @return Void.
+ */
+void show_device_properties();
+
+#if defined(ENABLE_MOTORS_IO)
 /**
  * @brief Initialize the pins of the board.
  * 
  */
 void init_pins();
+#endif // define(ENABLE_MOTORS_IO)
 
+#if defined(ENABLE_MOTORS)
 /**
  * @brief Initialize the stepper drivers.
  * 
@@ -98,7 +114,9 @@ void init_stepper_drivers();
  * 
  */
 void update_driver();
+#endif // define(ENABLE_MOTORS)
 
+#if defined(ENABLE_SUPER)
 /**
  * @brief Initialize the communication.
  * 
@@ -119,61 +137,15 @@ void update_communication();
  * @param payload Payload data.
  */
 void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t * payload);
+#endif // define(ENABLE_SUPER)
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
- */
-void show_device_properties();
+#if defined(ENABLE_OTA)
+void init_ota();
+#endif // define(ENABLE_OTA)
 
 #pragma endregion
 
 #pragma region Variables
-
-/**
- * @brief Motors state bits.
- * 
- */
-uint8_t MotorState_g;
-
-/**
- * @brief Store position flag.
- * 
- */
-bool StorePosition_g;
-
-uint8_t OperationMode_g;
-
-bool MotorsEnabled_g;
-
-/**
- * @brief Safety stop flag.
- * 
- */
-int SafetyStopFlag_g;
-
-/**
- * @brief Move joint in absolute mode.
- * 
- */
-JointPositionUnion MoveAbsolute_g;
-
-/**
- * @brief Move joint in relative mode.
- * 
- */
-JointPositionUnion MoveRelative_g;
-
-/**
- * @brief Move joint in speed mode.
- * 
- */
-JointPositionUnion MoveSpeed_g;
-
-/**
- * @brief Curent joint positions.
- * 
- */
-JointPositionUnion CurrentPositions_g;
 
 #ifdef DEAFULT_CREDENTIALS_H_
 
@@ -205,11 +177,65 @@ const char* PASS_g = "yourpasswd";
 
 #endif
 
+#if defined(ENABLE_MOTORS) || defined(ENABLE_SUPER)
 /**
- * @brief TCP server for robot operation service.
+ * @brief Motors enabled flag.
  * 
  */
-WiFiServer TCPServer_g(SERVICE_PORT);
+bool MotorsEnabled_g;
+
+/**
+ * @brief Motors state bits.
+ * 
+ */
+uint8_t MotorState_g;
+
+/**
+ * @brief Motors operation mode.
+ * 
+ */
+uint8_t OperationMode_g;
+
+/**
+ * @brief Safety stop flag.
+ * 
+ */
+int SafetyStopFlag_g;
+
+/**
+ * @brief Store position flag.
+ * 
+ */
+bool StorePosition_g;
+
+/**
+ * @brief Move joint in absolute mode.
+ * 
+ */
+JointPositionUnion MoveAbsolute_g;
+
+/**
+ * @brief Move joint in relative mode.
+ * 
+ */
+JointPositionUnion MoveRelative_g;
+
+/**
+ * @brief Move joint in speed mode.
+ * 
+ */
+JointPositionUnion MoveSpeed_g;
+
+/**
+ * @brief Curent joint positions.
+ * 
+ */
+JointPositionUnion CurrentPositions_g;
+
+
+#endif // defined(ENABLE_MOTORS) || defined(ENABLE_SUPER)
+
+#if defined(ENABLE_MOTORS)
 
 /**
  * @brief TCP server for robot operation service.
@@ -249,6 +275,18 @@ AccelStepper stepper6;
 
 MultiStepper steppers;
 
+#endif // defined(ENABLE_MOTORS)
+
+#if defined(ENABLE_SUPER)
+
+/**
+ * @brief TCP server for robot operation service.
+ * 
+ */
+WiFiServer TCPServer_g(SERVICE_PORT);
+
+#endif // defined(ENABLE_MOTORS) || defined(ENABLE_SUPER)
+
 #pragma endregion
 
 /**
@@ -256,28 +294,34 @@ MultiStepper steppers;
  * 
  */
 void setup() {
+
   //
   setup_debug_port();
-
-  OperationMode_g = OperationModes::NONE;
-  SafetyStopFlag_g = LOW;
-  MotorState_g = 0;
-  StorePosition_g = true;
-
-  //
-  init_pins();
-
-  //
-  init_stepper_drivers();
 
   //
   show_device_properties();
 
+#if defined(ENABLE_MOTORS_IO)
+  //
+  init_pins();
+#endif // define(ENABLE_MOTORS_IO)
+
+#if defined(ENABLE_MOTORS)
+  //
+  init_stepper_drivers();
+#endif // define(ENABLE_MOTORS)
+
+#if defined(ENABLE_SUPER)
   // Initialize the communication.
   init_communication();
 
   // Initialize the SUPER protocol parser.
   SUPER.setCbRequest(cbRequestHandler);
+#endif // define(ENABLE_SUPER)
+
+#if defined(ENABLE_OTA)
+  init_ota();  
+#endif // define(ENABLE_OTA)
 }
 
 /**
@@ -285,8 +329,16 @@ void setup() {
  * 
  */
 void loop() {
-  update_communication();
 
+#if defined(ENABLE_SUPER)
+  update_communication();
+#endif // define(ENABLE_SUPER)
+
+#if defined(ENABLE_OTA)
+  ArduinoOTA.handle();
+#endif // define(ENABLE_OTA)
+
+#if defined(ENABLE_MOTORS)
   if (SafetyStopFlag_g == LOW) {
     // Robko01.update();
     // MotorState_g = Robko01.get_motor_state();
@@ -295,15 +347,40 @@ void loop() {
 
   if (MotorState_g == 0 && StorePosition_g) {
     StorePosition_g = false;
-
     // TODO: Save position.
   } else {
     StorePosition_g = true;
   }
+#endif // define(ENABLE_MOTORS)
 }
 
 #pragma region Functions
 
+/** @brief Printout in the debug console flash state.
+ *  @return Void.
+ */
+void show_device_properties() {
+#ifdef SHOW_FUNC_NAMES
+  DEBUGLOG("\r\n");
+  DEBUGLOG(__PRETTY_FUNCTION__);
+  DEBUGLOG("\r\n");
+#endif  // SHOW_FUNC_NAMES
+
+#if defined(ESP8266)
+  // ESP8266
+  DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
+#endif
+
+  DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
+  DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
+  DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
+  DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
+  DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
+  DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
+  DEBUGLOG("\r\n");
+}
+
+#if defined(ENABLE_MOTORS_IO)
 /**
  * @brief Initialize the pins of the board.
  * 
@@ -376,7 +453,7 @@ void init_pins() {
   digitalWrite(M6_STP, HIGH);
 
   // Enable all drivers.
-  digitalWrite(MX_ENB, LOW);
+  // digitalWrite(MX_ENB, LOW);
 
   //
   pinMode(M1_LIMIT, INPUT_PULLUP);
@@ -387,7 +464,9 @@ void init_pins() {
   //
   pinMode(M6_LIMIT, INPUT_PULLUP);
 }
+#endif // define(ENABLE_MOTORS_IO)
 
+#if defined(ENABLE_MOTORS)
 /**
  * @brief Initialize the stepper drivers.
  * 
@@ -398,6 +477,18 @@ void init_stepper_drivers() {
   DEBUGLOG(__PRETTY_FUNCTION__);
   DEBUGLOG("\r\n");
 #endif  // SHOW_FUNC_NAMES
+
+  // Toggle the sasfty because there is noe E-Stop at this time.
+  SafetyStopFlag_g = LOW;
+
+  // Store position flag initialization.
+  StorePosition_g = false;
+
+  // Init the motors state.  
+  MotorState_g = 0;
+
+  // Init the steppers operation mode.
+  OperationMode_g = OperationModes::NONE;
 
   stepper1 = AccelStepper(AccelStepper::DRIVER, M1_STP, M1_DIR);
   stepper2 = AccelStepper(AccelStepper::DRIVER, M2_STP, M2_DIR);
@@ -469,7 +560,9 @@ void update_driver() {
     bitWrite(MotorState_g, 5, state);
   }
 }
+#endif // define(ENABLE_MOTORS)
 
+#if defined(ENABLE_SUPER)
 /**
  * @brief Initialize the communication.
  * 
@@ -481,7 +574,8 @@ void init_communication() {
   DEBUGLOG("\r\n");
 #endif  // SHOW_FUNC_NAMES
 
-  // start the Wi-Fi connection and the server:
+  // Start the Wi-Fi connection and the server:
+  WiFi.mode(WIFI_STA);
   WiFi.begin(SSID_g, PASS_g);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -489,15 +583,15 @@ void init_communication() {
     DEBUGLOG(".");
   }
 
+  // Start the server.
+  TCPServer_g.begin();
+
   DEBUGLOG("\r\n");
   DEBUGLOG("Connected:  %s\r\n", SSID_g);
   DEBUGLOG("IP Address: %s\r\n", WiFi.localIP().toString().c_str());
   DEBUGLOG("Gateway:    %s\r\n", WiFi.gatewayIP().toString().c_str());
   DEBUGLOG("DNS:        %s\r\n", WiFi.dnsIP().toString().c_str());
   DEBUGLOG("\r\n");
-
-  // Start the server.
-  TCPServer_g.begin();
 }
 
 /**
@@ -558,14 +652,9 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
 #endif  // SHOW_FUNC_NAMES
 
   if (opcode == OpCodes::Ping) {
-#ifdef SHOW_FUNC_NAMES
-    DEBUGLOG("\r\n");
-    DEBUGLOG(__PRETTY_FUNCTION__);
-    DEBUGLOG("\r\n");
-    DEBUGLOG("Ping...\r\n");
-#endif  // SHOW_FUNC_NAMES
     SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
   } else if (opcode == OpCodes::Stop) {
+#ifdef defined(ENABLE_MOTORS)
     // Robko01.stop_motors();
     stepper1.stop();
     stepper2.stop();
@@ -573,9 +662,10 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper4.stop();
     stepper5.stop();
     stepper6.stop();
-
+#endif  // SHOW_FUNC_NAMES
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::Disable) {
+#ifdef defined(ENABLE_MOTORS)
     // Robko01.disable_motors();
     stepper1.disableOutputs();
     stepper2.disableOutputs();
@@ -585,9 +675,10 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper6.disableOutputs();
     digitalWrite(MX_ENB, HIGH);
     MotorsEnabled_g = false;
-
+#endif  // SHOW_FUNC_NAMES
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::Enable) {
+#ifdef defined(ENABLE_MOTORS)
     // Robko01.enable_motors();
     stepper1.enableOutputs();
     stepper2.enableOutputs();
@@ -597,9 +688,10 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper6.enableOutputs();
     digitalWrite(MX_ENB, LOW);
     MotorsEnabled_g = true;
-
+#endif  // SHOW_FUNC_NAMES
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::Clear) {
+#ifdef defined(ENABLE_MOTORS)
     // Robko01.clear_motors();
     stepper1.setCurrentPosition(0);
     stepper2.setCurrentPosition(0);
@@ -607,7 +699,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper4.setCurrentPosition(0);
     stepper5.setCurrentPosition(0);
     stepper6.setCurrentPosition(0);
-
+#endif  // SHOW_FUNC_NAMES
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::MoveRelative) {
     // If it is not enabled, do not execute.
@@ -627,7 +719,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     for (uint8_t index = 0; index < DataLengthL; index++) {
       MoveRelative_g.Buffer[index] = payload[index];
     }
-
+#ifdef defined(ENABLE_MOTORS)
     // Set motion data.
     // Robko01.move_relative(MoveRelative_g.Value);
     OperationMode_g = OperationModes::Positioning;
@@ -650,7 +742,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper6.move(MoveRelative_g.Value.GripperPos);
     stepper6.setSpeed(MoveRelative_g.Value.GripperSpeed);
     // stepper6.setMaxSpeed(MoveRelative_g.Value.GripperSpeed + MAX_SPEED_OFFSET);
-
+#endif  // SHOW_FUNC_NAMES
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::MoveAbsolute) {
@@ -678,7 +770,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     for (uint8_t index = 0; index < DataLengthL; index++) {
       MoveAbsolute_g.Buffer[index] = payload[index];
     }
-
+#ifdef defined(ENABLE_MOTORS)
     // Set motion data.
     // Robko01.move_absolute(MoveAbsolute_g.Value);
 
@@ -702,8 +794,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper6.moveTo(MoveRelative_g.Value.GripperPos);
     stepper6.setSpeed(MoveRelative_g.Value.GripperSpeed);
     stepper6.setMaxSpeed(MoveRelative_g.Value.GripperSpeed + MAX_SPEED_OFFSET);
-
-
+#endif  // SHOW_FUNC_NAMES
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::DO) {
@@ -719,18 +810,12 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, m_payloadResponse, 1);
   } else if (opcode == OpCodes::IsMoving) {
-#ifdef SHOW_FUNC_NAMES_S
-    DEBUGLOG("\r\n");
-    DEBUGLOG(__PRETTY_FUNCTION__);
-    DEBUGLOG("\r\n");
-    DEBUGLOG("IsMoveing...\r\n");
-#endif  // SHOW_FUNC_NAMES
     uint8_t m_payloadResponse[1];
     m_payloadResponse[0] = MotorState_g;
-
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, m_payloadResponse, 1);
   } else if (opcode == OpCodes::CurrentPosition) {
+#ifdef defined(ENABLE_MOTORS)
     // CurrentPositions_g.Value = Robko01.get_position();
 
     CurrentPositions_g.Value.BasePos = (int16_t)stepper1.currentPosition();
@@ -745,7 +830,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     CurrentPositions_g.Value.RightDiffSpeed = (int16_t)stepper5.speed();
     CurrentPositions_g.Value.GripperPos = (int16_t)stepper6.currentPosition();
     CurrentPositions_g.Value.GripperSpeed = (int16_t)stepper6.speed();
-
+#endif  // SHOW_FUNC_NAMES
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, CurrentPositions_g.Buffer, sizeof(JointPosition_t));
   } else if (opcode == OpCodes::MoveSpeed) {
@@ -758,7 +843,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     for (uint8_t index = 0; index < size; index++) {
       MoveSpeed_g.Buffer[index] = payload[index];
     }
-
+#ifdef defined(ENABLE_MOTORS)
     // Set motion data.
     // Robko01.move_speed(MoveSpeed_g.Value);
     OperationMode_g = OperationModes::Speed;
@@ -769,7 +854,7 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     stepper4.setSpeed(MoveSpeed_g.Value.LeftDiffSpeed);
     stepper5.setSpeed(MoveSpeed_g.Value.RightDiffSpeed);
     stepper6.setSpeed(MoveSpeed_g.Value.GripperSpeed);
-
+#endif  // SHOW_FUNC_NAMES
     // Respond with success.
     SUPER.send_raw_response(opcode, StatusCodes::Ok, NULL, 0);
   } else if (opcode == OpCodes::SetRobotID) {
@@ -790,29 +875,64 @@ void cbRequestHandler(uint8_t opcode, uint8_t size, uint8_t* payload) {
     SUPER.send_raw_response(opcode, StatusCodes::Ok, payload, size - 1);
   }
 }
+#endif // define(ENABLE_SUPER)
 
-/** @brief Printout in the debug console flash state.
- *  @return Void.
- */
-void show_device_properties() {
+#if defined(ENABLE_OTA)
+void init_ota() {
 #ifdef SHOW_FUNC_NAMES
   DEBUGLOG("\r\n");
   DEBUGLOG(__PRETTY_FUNCTION__);
   DEBUGLOG("\r\n");
 #endif  // SHOW_FUNC_NAMES
 
-#if defined(ESP8266)
-  // ESP8266
-  DEBUGLOG("Flash chip size: %u\r\n", ESP.getFlashChipRealSize());
-#endif
+  // Port defaults to 3232
+  // ArduinoOTA.setPort(3232);
 
-  DEBUGLOG("Sketch size: %u\r\n", ESP.getSketchSize());
-  DEBUGLOG("Free flash space: %u\r\n", ESP.getFreeSketchSpace());
-  DEBUGLOG("Free heap: %d\r\n", ESP.getFreeHeap());
-  DEBUGLOG("Firmware version: %d\r\n", ESP_FW_VERSION);
-  DEBUGLOG("SDK version: %s\r\n", ESP.getSdkVersion());
-  DEBUGLOG("MAC address: %s\r\n", WiFi.macAddress().c_str());
-  DEBUGLOG("\r\n");
+  // Hostname defaults to esp3232-[MAC]
+  // ArduinoOTA.setHostname("myesp32");
+
+  // No authentication by default
+  // ArduinoOTA.setPassword("admin");
+
+  // Password can be set with it's md5 value as well
+  // MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+  // ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+  ArduinoOTA
+    .onStart([]() {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH) {
+        type = "sketch";
+      } else {  // U_SPIFFS
+        type = "filesystem";
+      }
+
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Serial.println("Start updating " + type);
+    })
+    .onEnd([]() {
+      Serial.println("\nEnd");
+    })
+    .onProgress([](unsigned int progress, unsigned int total) {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    })
+    .onError([](ota_error_t error) {
+      Serial.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) {
+        Serial.println("Auth Failed");
+      } else if (error == OTA_BEGIN_ERROR) {
+        Serial.println("Begin Failed");
+      } else if (error == OTA_CONNECT_ERROR) {
+        Serial.println("Connect Failed");
+      } else if (error == OTA_RECEIVE_ERROR) {
+        Serial.println("Receive Failed");
+      } else if (error == OTA_END_ERROR) {
+        Serial.println("End Failed");
+      }
+    });
+
+  ArduinoOTA.begin();
 }
+#endif // define(ENABLE_OTA)
 
 #pragma endregion
