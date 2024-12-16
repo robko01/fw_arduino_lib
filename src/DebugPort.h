@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Definitions
 
-// #define ENABLE_DEBUG_PORT
+#define ENABLE_DEBUG_PORT
 
 #define SHOW_FUNC_NAMES
 
