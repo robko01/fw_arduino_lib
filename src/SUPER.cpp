@@ -273,6 +273,7 @@ void SUPERClass::read_frame() {
 				CommStateL = fsRequestResponse;
 #ifdef SHOW_STATES
 				DEBUGLOG("fsSentinel -> fsRequestResponse\r\n");
+				DEBUGLOG("Sentinel: %02X (%d)\r\n", InByteL, InByteL);
 #endif
 			}
 			break;
@@ -286,6 +287,7 @@ void SUPERClass::read_frame() {
 				CommStateL = fsLength;
 #ifdef SHOW_STATES
 				DEBUGLOG("fsRequestResponse -> fsLength\r\n");
+				DEBUGLOG("FrmType: %02X (%d)\r\n", InByteL, InByteL);
 #endif
 			}
 			else
@@ -305,6 +307,7 @@ void SUPERClass::read_frame() {
 				CommStateL = fsOperationCode;
 #ifdef SHOW_STATES
 				DEBUGLOG("fsLength -> fsOperationCode\r\n");
+				DEBUGLOG("Length: %02X (%d)\r\n", InByteL, InByteL);
 #endif
 			}
 			else
@@ -324,6 +327,7 @@ void SUPERClass::read_frame() {
 				CommStateL = fsData;
 #ifdef SHOW_STATES
 				DEBUGLOG("fsOperationCode -> fsData\r\n");
+				DEBUGLOG("OpCode: %02X (%d)\r\n", InByteL, InByteL);
 #endif
 			}
 			else
@@ -339,6 +343,7 @@ void SUPERClass::read_frame() {
 
 		case fsData:
 			*m_ptrFrameBuffer++ = InByteL;
+			DEBUGLOG("Data: %02X (%d)\r\n", InByteL, InByteL);
 			if (--TemporalDataLengthL == 0)
 			{
 				TemporalDataLengthL = FRAME_CRC_LEN;
@@ -360,7 +365,6 @@ void SUPERClass::read_frame() {
 				}
 				DEBUGLOG("\r\n");
 #endif
-
 				if (validate_CRC(m_frameBuffer, m_frameBuffer[FrameIndexes::Length] + FRAME_REQUEST_STATIC_FIELD_SIZE - 1 + FRAME_CRC_LEN))
 				{
 					parse_frame(m_frameBuffer, m_frameBuffer[FrameIndexes::Length] + FRAME_REQUEST_STATIC_FIELD_SIZE - 1);
@@ -371,7 +375,6 @@ void SUPERClass::read_frame() {
 					DEBUGLOG("Invalid CRC\r\n");
 #endif
 				}
-
 				CommStateL = fsSentinel;
 			}
 			break;
