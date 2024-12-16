@@ -43,4 +43,3 @@ void setup_debug_port()
 	DEBUGLOG("\r\n");
 #endif // SHOW_FUNC_NAMES
 }
-
