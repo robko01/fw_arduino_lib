@@ -343,7 +343,9 @@ void SUPERClass::read_frame() {
 
 		case fsData:
 			*m_ptrFrameBuffer++ = InByteL;
+#ifdef SHOW_STATES
 			DEBUGLOG("Data: %02X (%d)\r\n", InByteL, InByteL);
+#endif
 			if (--TemporalDataLengthL == 0)
 			{
 				TemporalDataLengthL = FRAME_CRC_LEN;
