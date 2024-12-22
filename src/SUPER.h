@@ -101,7 +101,11 @@ class SUPERClass
 #pragma region Enum
 
 	/** @brief Communication state machine states. */
-	typedef enum : uint8_t
+#if defined(ESP32)
+	enum : uint8_t
+#else
+	typedef enum : uint8_t	
+#endif
 	{
 		fsSentinel = 0U, ///< Beginning byte.
 		fsRequestResponse, ///< Request / Response byte.
