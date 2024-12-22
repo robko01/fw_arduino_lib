@@ -19,6 +19,14 @@
 	SOFTWARE.
 */
 
+/*
+    S - Synchronious
+    U - Unified
+    P - Protocol
+    E - for Extendable
+    R - Robots
+ */
+
 #include "SUPER.h"
 
 /** @brief Send RAW request frame.

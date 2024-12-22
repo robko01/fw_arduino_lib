@@ -19,6 +19,14 @@
 	SOFTWARE.
 */
 
+/*
+    S - Synchronious
+    U - Unified
+    P - Protocol
+    E - for Extendable
+    R - Robots
+ */
+
 #ifndef _SUPER_h
 #define _SUPER_h
 
