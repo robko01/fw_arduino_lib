@@ -296,7 +296,7 @@ WiFiServer TCPServer_g(SERVICE_PORT);
 void setup() {
 
   //
-  setup_debug_port();
+  setup_debug_port(DBG_OUTPUT_PORT_BAUDRATE);
 
   //
   show_device_properties();

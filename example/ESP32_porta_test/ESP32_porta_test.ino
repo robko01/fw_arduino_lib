@@ -130,7 +130,7 @@ void setup()
         PIN_DO3,
 	};
 
-	setup_debug_port();
+	setup_debug_port(DBG_OUTPUT_PORT_BAUDRATE);
 
 	// Initialize the robot controller.
 	Robko01.init(&config);

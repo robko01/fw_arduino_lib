@@ -231,7 +231,7 @@ AppWEBServer AppWEBServer_g(WEB_SERVER_PORT);
 void setup()
 {
 	// Setup debug port module.
-	setup_debug_port();
+	setup_debug_port(DBG_OUTPUT_PORT_BAUDRATE);
 
 #ifdef ENABLE_RESCUE_BTN
 	config_rescue_procedure();

@@ -28,9 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Setup debug port.
  *  @return Void
  */
-void setup_debug_port()
+void setup_debug_port(unsigned long baud)
 {
-	DBG_OUTPUT_PORT.begin(DBG_OUTPUT_PORT_BAUDRATE, SERIAL_8N1);
+	DBG_OUTPUT_PORT.begin(baud, SERIAL_8N1);
 	DBG_OUTPUT_PORT.print("\r\n\r\n\r\n");
 
 #ifdef ENABLE_DEBUG_PORT

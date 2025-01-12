@@ -32,15 +32,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma region Definitions
 
+#if !defined(ENABLE_DEBUG_PORT)
 #define ENABLE_DEBUG_PORT
+#endif
 
-#define SHOW_FUNC_NAMES
-
+#if !defined(DBG_OUTPUT_PORT_BAUDRATE)
 #define DBG_OUTPUT_PORT_BAUDRATE 115200
+#endif
 
+#if !defined(DBG_OUTPUT_PORT)
 #define DBG_OUTPUT_PORT Serial
+#endif
 
-#ifndef ENABLE_DEBUG_PORT
+#if !defined(ENABLE_DEBUG_PORT)
 #define DEBUGLOG(...)
 #else
 #define DEBUGLOG(...) DBG_OUTPUT_PORT.printf(__VA_ARGS__)
@@ -53,7 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** @brief Setup debug port.
  *  @return Void
  */
-void setup_debug_port();
+void setup_debug_port(unsigned long baud);
 
 #pragma endregion
 #endif
