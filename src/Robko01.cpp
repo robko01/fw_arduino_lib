@@ -500,23 +500,23 @@ void Robko01Class::move_relative(JointPosition_t position) {
 
 	m_operationMode = OperationModes::Positioning;
 
-	m_steppers[AddressIndex::Base].move(position.BasePos);
 	m_steppers[AddressIndex::Base].setSpeed(position.BaseSpeed);
+	m_steppers[AddressIndex::Base].move(position.BasePos);
 	// m_steppers[AddressIndex::Base].setMaxSpeed(position.BaseSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Shoulder].move(position.ShoulderPos);
 	m_steppers[AddressIndex::Shoulder].setSpeed(position.ShoulderSpeed);
+	m_steppers[AddressIndex::Shoulder].move(position.ShoulderPos);
 	// m_steppers[AddressIndex::Shoulder].setMaxSpeed(position.ShoulderSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Elbow].move(position.ElbowPos);
 	m_steppers[AddressIndex::Elbow].setSpeed(position.ElbowSpeed);
+	m_steppers[AddressIndex::Elbow].move(position.ElbowPos);
 	// m_steppers[AddressIndex::Elbow].setMaxSpeed(position.ElbowSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::DiffLeft].move(position.LeftDiffPos);
 	m_steppers[AddressIndex::DiffLeft].setSpeed(position.LeftDiffSpeed);
+	m_steppers[AddressIndex::DiffLeft].move(position.LeftDiffPos);
 	// m_steppers[AddressIndex::DiffLeft].setMaxSpeed(position.LeftDiffSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::DiffRight].move(position.RightDiffPos);
 	m_steppers[AddressIndex::DiffRight].setSpeed(position.RightDiffSpeed);
+	m_steppers[AddressIndex::DiffRight].move(position.RightDiffPos);
 	// m_steppers[AddressIndex::DiffRight].setMaxSpeed(position.RightDiffSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Gripper].move(position.GripperPos);
 	m_steppers[AddressIndex::Gripper].setSpeed(position.GripperSpeed);
+	m_steppers[AddressIndex::Gripper].move(position.GripperPos);
 	// m_steppers[AddressIndex::Gripper].setMaxSpeed(position.GripperSpeed + MAX_SPEED_OFFSET);
 }
 
@@ -534,24 +534,24 @@ void Robko01Class::move_absolute(JointPosition_t position) {
 
 	m_operationMode = OperationModes::Positioning;
 
-	m_steppers[AddressIndex::Base].moveTo(position.BasePos);
 	m_steppers[AddressIndex::Base].setSpeed(position.BaseSpeed);
 	m_steppers[AddressIndex::Base].setMaxSpeed(position.BaseSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Shoulder].moveTo(position.ShoulderPos);
+	m_steppers[AddressIndex::Base].moveTo(position.BasePos);
 	m_steppers[AddressIndex::Shoulder].setSpeed(position.ShoulderSpeed);
 	m_steppers[AddressIndex::Shoulder].setMaxSpeed(position.ShoulderSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Elbow].moveTo(position.ElbowPos);
+	m_steppers[AddressIndex::Shoulder].moveTo(position.ShoulderPos);
 	m_steppers[AddressIndex::Elbow].setSpeed(position.ElbowSpeed);
 	m_steppers[AddressIndex::Elbow].setMaxSpeed(position.ElbowSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::DiffLeft].moveTo(position.LeftDiffPos);
+	m_steppers[AddressIndex::Elbow].moveTo(position.ElbowPos);
 	m_steppers[AddressIndex::DiffLeft].setSpeed(position.LeftDiffSpeed);
 	m_steppers[AddressIndex::DiffLeft].setMaxSpeed(position.LeftDiffSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::DiffRight].moveTo(position.RightDiffPos);
+	m_steppers[AddressIndex::DiffLeft].moveTo(position.LeftDiffPos);
 	m_steppers[AddressIndex::DiffRight].setSpeed(position.RightDiffSpeed);
 	m_steppers[AddressIndex::DiffRight].setMaxSpeed(position.RightDiffSpeed + MAX_SPEED_OFFSET);
-	m_steppers[AddressIndex::Gripper].moveTo(position.GripperPos);
+	m_steppers[AddressIndex::DiffRight].moveTo(position.RightDiffPos);
 	m_steppers[AddressIndex::Gripper].setSpeed(position.GripperSpeed);
 	m_steppers[AddressIndex::Gripper].setMaxSpeed(position.GripperSpeed + MAX_SPEED_OFFSET);
+	m_steppers[AddressIndex::Gripper].moveTo(position.GripperPos);
 }
 
 /**
