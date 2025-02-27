@@ -20,7 +20,7 @@
 */
 
 /*
-    S - Synchronious
+    S - Synchronous
     U - Unified
     P - Protocol
     E - for Extendable
