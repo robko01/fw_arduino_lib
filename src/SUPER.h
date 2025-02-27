@@ -35,7 +35,7 @@
 // #define SHOW_STATES
 
 /** @brief Communication port update rate. */
-#define UPDATE_RATE 22
+#define UPDATE_RATE 1
 
 /** @brief Minimum frame length. */
 #define FRAME_MIN_LEN 6
