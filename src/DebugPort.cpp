@@ -33,9 +33,9 @@ void setup_debug_port(unsigned long baud)
 	DBG_OUTPUT_PORT.begin(baud, SERIAL_8N1);
 	DBG_OUTPUT_PORT.print("\r\n\r\n\r\n");
 
-#ifdef ENABLE_DEBUG_PORT
+#if defined(ENABLE_DEBUG_PORT) && defined(ESP32)
 	DBG_OUTPUT_PORT.setDebugOutput(true);
-#endif
+#endif // defined(ENABLE_DEBUG_PORT) && defined(ESP32)
 
 #ifdef SHOW_FUNC_NAMES
 	DEBUGLOG("\r\n");
